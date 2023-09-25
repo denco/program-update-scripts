@@ -1,0 +1,7 @@
+# Set the default behavior, use LF as line ending
+* text eol=lf encoding=utf-8
+
+# Declare files that will always have CRLF line endings on checkout.
+*.bat text eol=crlf encoding=us-ascii
+*.cmd text eol=crlf encoding=us-ascii
+
