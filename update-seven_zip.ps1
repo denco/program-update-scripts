@@ -16,8 +16,6 @@ $vScanner = "$(Get-Childitem `
             | Select-Object -Last 1
             )"
 
-# # gpg
-# # gpg --receive-keys C2839ECAD9408FBE9531C3E9F434A1EFAFEEAEA3
 # $gpg  = "$($TargetPath)\git\usr\bin\gpg.exe"
 
 $TargetDir = "$($TargetPath)\7-Zip"
@@ -62,9 +60,13 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     # Write-Output ">$($DownloadFullPath)<"
     # Write-Output ">$($Url)<"
 
-#     $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-#     $Sha256Sum = (Invoke-WebRequest -Uri "$($Url).sha256").Content.Trim().split(' ')[0]
-#     $ProgressPreference = 'Continue'
+    $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
+    $ShaSum = ("$((Invoke-WebRequest -Uri "$($MainVersionURL)/$($RemoteLatestTag)/").Content.Split("`n") `
+                | Select-String -Pattern "net.sf.files" -SimpleMatch)".split("=")[1].replace(";", "") `
+                | ConvertFrom-Json
+              ).$TargetFileName.sha1
+
+    $ProgressPreference = 'Continue'
 
     if ( -not (Test-Path -Path $DownloadFullPath) ) {
         # download file
@@ -77,10 +79,9 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
 #     Invoke-WebRequest -Uri "$($Url).asc" -OutFile "$($DownloadFullPath).asc"
 #     $ProgressPreference = 'Continue'
 
-#     # Write-Output ">$($Sha256Sum)<"
+    # Write-Output ">$($ShaSum)<"
 
-    # if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
-    # if (1 == 1) {
+    if ((Get-FileHash $DownloadFullPath -Algorithm SHA1).Hash.ToLower() -eq "$($ShaSum)") {
         Move-Item $TargetDir $BackupDir `
             && Write-Output "check malware" `
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
@@ -95,7 +96,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `
             && Write-Output "updated to version: $($RemoteLatestTag)" `
         || Move-Item $BackupDir $TargetDir
-    # }
+    }
 } else {
     Write-Output "Nothing to update."
 }
