@@ -13,7 +13,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | sort LastWriteTime -Descending `
+            | Sort-Object LastWriteTime -Descending `
             | Select-Object -Last 1
             )"
 
