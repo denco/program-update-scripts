@@ -12,7 +12,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | sort LastWriteTime -Descending `
+            | Sort-Object LastWriteTime -Descending `
             | Select-Object -Last 1
             )"
 
@@ -39,16 +39,17 @@ if ( $GitCurrentVersion -eq "0.0.0" ) {
 
 } else {
     $GitRemoteLatestTag = "$(git ls-remote --tags "https://github.com/git/git.git" `
+                                | Select-String -Pattern "\{\}|-rc" -NotMatch `
                                 | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split 'v')[1] } `
                                 | Select-Object -Last 1 )`
                             ".Trim().Split('v')[1]
 }
 
 $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-$GitRemoteReleasesResponse = Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases
+$GitRemoteReleasesResponse = Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases"
 $ProgressPreference = 'Continue'
 
-# Write-Output "remote: >$($GitRemoteLatestTag)<"
+# Write-Output "local : >$($GitCurrentVersion)<"
 # Write-Output "local : >$($GitCurrentVersion)<"
 
 if ( [System.Version]$GitRemoteLatestTag -gt [System.Version]$GitCurrentVersion ) {
@@ -64,9 +65,15 @@ if ( [System.Version]$GitRemoteLatestTag -gt [System.Version]$GitCurrentVersion 
 
     $FileSearchPattern = "$($FilePrefix)-$($GitRemoteLatestTag)(.\d)?-$($FileSearchSuffix)"
 
-    # $TargetFileName = (($GitRemoteReleasesResponse.Content.Split("`n") | select-string -Pattern "$($FileSearchPattern)" -AllMatches -Context 0,1)[0] -replace "</?td>", "" -split "\n")[0].split(" ")[1].trim()
+    try {
+        # $TargetFileName = (($GitRemoteReleasesResponse.Content.Split("`n") | select-string -Pattern "$($FileSearchPattern)" -AllMatches -Context 0,1)[0] -replace "</?td>", "" -split "\n")[0].split(" ")[1].trim()
+        $TargetDownload = (($GitRemoteReleasesResponse.Content.Split("`n") | select-string -Pattern $FileSearchPattern -AllMatches -Context 0,1)[0] -replace "</?td>|\r|\n|\f", "" -replace "\B\s+|>|<", "")
+    }
+    catch {
+        Write-Output "no windows package found"
+        exit
+    }
 
-    $TargetDownload = (($GitRemoteReleasesResponse.Content.Split("`n") | select-string -Pattern "$($FileSearchPattern)" -AllMatches -Context 0,1)[0] -replace "</?td>|\r|\n|\f", "" -replace "\B\s+|>|<", "")
     $TargetFileName = ($TargetDownload -split "\s+")[0]
     $Sha256Sum = ($TargetDownload -split "\s+")[1]
 
@@ -79,8 +86,9 @@ if ( [System.Version]$GitRemoteLatestTag -gt [System.Version]$GitCurrentVersion 
     $GitRemoteLatestVersion = ($GitRemoteLatestVersionArray -join ".")
 
     $GitRemoteLatestVersionSuffix = ".windows.1"
-    if ($GitRemoteLatestVersionArray.count > 3) {
-        $GitRemoteLatestVersionSuffix = ".windows." + ($TargetFileName.Replace("$($FilePrefix)-", "").Replace("-$($FileSearchSuffix)", "").Split(".")[-2])
+    if ($GitRemoteLatestVersionArray.count -gt 3) {
+        $GitRemoteLatestVersionSuffix = ".windows." + $GitRemoteLatestVersionArray[3]
+        $GitRemoteLatestVersion = ($GitRemoteLatestVersionArray[0..2] -join ".")
     }
     #
     # write-Output $GitRemoteLatestVersionArray
