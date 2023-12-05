@@ -13,7 +13,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | sort LastWriteTime -Descending `
+            | Sort-Object LastWriteTime -Descending `
             | Select-Object -Last 1
             )"
 
@@ -22,8 +22,8 @@ $BackupDir = "$($TargetDir).bak"
 
 Write-Output "check updates for: beekeeper studio"
 
-
-$excludePattern = "-|{}|latest|v7\.7\.0|v7\.8\.0|v7\.8\.1"
+##old# $excludePattern = "-|{}|latest|v7\.7\.0|v7\.8\.0|v7\.8\.1"
+$excludePattern = "-|{}|latest|v7\.[7|8]\.[0|1]"
 $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/beekeeper-studio/beekeeper-studio.git" `
                         | Select-String -Pattern $excludePattern -NotMatch `
                         | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split 'v')[1] } `
