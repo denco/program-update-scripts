@@ -19,6 +19,8 @@ $vScanner = "$(Get-Childitem `
 
 # gpg
 # gpg --receive-keys 7B037EEBE0F0DEDFEE65B6983703AC389A12A9D4
+# gpg --receive-keys 8FE1C26F15E0320E740BAED84A2601CEDA9382F3
+
 $gpg  = "$($TargetPath)\git\usr\bin\gpg.exe"
 
 $TargetDir = "$($TargetPath)\netbeans"
@@ -40,7 +42,6 @@ if ( Test-Path -Path $TargetDir ) {
                         ).netbeans_default_userdir
                       ).Split("/")[1].Replace('"','')
     # netbeans_default_userdir="${DEFAULT_USERDIR_ROOT}/18"
-
 } else {
     # create new empty dir as backup fallback
     New-Item -Path "$($TargetPath)" -Name "netbeans" -ItemType "directory" > nul
