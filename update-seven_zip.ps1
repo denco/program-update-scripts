@@ -87,10 +87,10 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
             && Write-Output "extract" `
             && Start-Process -NoNewWindow msiexec.exe -ArgumentList "/a $($DownloadFullPath) /qb TARGETDIR=$($TargetDir).new" -Wait `
-            && cd $(join-path "$($TargetDir).new" 'Files') `
+            && Set-Location $(join-path "$($TargetDir).new" 'Files') `
             && Move-Item '7*' $TargetDir `
             && Write-Output "cleanup" `
-            && cd $OldPath `
+            && Set-Location $OldPath `
             && Remove-Item -Path $DownloadFullPath -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `

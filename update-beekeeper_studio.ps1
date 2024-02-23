@@ -78,11 +78,11 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
             && Write-Output "extract" `
             && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir).new" > nul `
-            && cd $(join-path "$($TargetDir).new" '$PLUGINSDIR') `
+            && Set-Location $(join-path "$($TargetDir).new" '$PLUGINSDIR') `
             && & $7Zip x "app-64.7z" -o"$($TargetDir)" > nul `
             && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
             && Write-Output "cleanup" `
-            && cd $OldPath `
+            && Set-Location $OldPath `
             && Remove-Item -Path $DownloadFullPath -Force `
             && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
