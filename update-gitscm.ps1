@@ -38,9 +38,10 @@ if ( $GitCurrentVersion -eq "0.0.0" ) {
                             )".Split('Git-').Split('-')[3].Split(".")[0..2] -join "."
 
 } else {
-    $GitRemoteLatestTag = "$(git ls-remote --tags "https://github.com/git/git.git" `
+    $GitRemoteLatestTag = "$(git ls-remote --tags "https://github.com/git-for-windows/git.git" `
                                 | Select-String -Pattern "\{\}|-rc" -NotMatch `
-                                | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split 'v')[1] } `
+                                | Select-String -Pattern "windows" -SimpleMatch `
+                                | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -replace '\.windows.*', '' -split '[v]')[1] } `
                                 | Select-Object -Last 1 )`
                             ".Trim().Split('v')[1]
 }
@@ -49,10 +50,10 @@ $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI
 $GitRemoteReleasesResponse = Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases"
 $ProgressPreference = 'Continue'
 
-# Write-Output "local : >$($GitCurrentVersion)<"
+# Write-Output "remote : >$($GitRemoteLatestTag)<"
 # Write-Output "local : >$($GitCurrentVersion)<"
 
-if ( [System.Version]$GitRemoteLatestTag -gt [System.Version]$GitCurrentVersion ) {
+if ( [System.Version]($GitRemoteLatestTag -replace '\.windows.*', '') -gt [System.Version]$GitCurrentVersion ) {
     Write-Output "update needed to: $($GitRemoteLatestTag)"
 
     # MinGit
@@ -63,8 +64,7 @@ if ( [System.Version]$GitRemoteLatestTag -gt [System.Version]$GitCurrentVersion 
     $FilePrefix  = "PortableGit"
     $FileSearchSuffix  = "64-bit.7z.exe"
 
-    $FileSearchPattern = "$($FilePrefix)-$($GitRemoteLatestTag)(.\d)?-$($FileSearchSuffix)"
-
+    $FileSearchPattern = "$($FilePrefix)-$($GitRemoteLatestTag -replace '\.windows.*', '')(.\d)?-$($FileSearchSuffix)"
     try {
         # $TargetFileName = (($GitRemoteReleasesResponse.Content.Split("`n") | select-string -Pattern "$($FileSearchPattern)" -AllMatches -Context 0,1)[0] -replace "</?td>", "" -split "\n")[0].split(" ")[1].trim()
         $TargetDownload = (($GitRemoteReleasesResponse.Content.Split("`n") | select-string -Pattern $FileSearchPattern -AllMatches -Context 0,1)[0] -replace "</?td>|\r|\n|\f", "" -replace "\B\s+|>|<", "")
@@ -97,10 +97,6 @@ if ( [System.Version]$GitRemoteLatestTag -gt [System.Version]$GitCurrentVersion 
 
     if ( -not (Test-Path -Path $DownloadFullPath)) {
         $Url = "https://github.com/git-for-windows/git/releases/download/v$($GitRemoteLatestVersion)$($GitRemoteLatestVersionSuffix)/$($TargetFileName)"
-
-        # Write-Output "EXP : https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.1/MinGit-2.42.0-64-bit.zip"
-        # Write-Output "EXP : https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.1/PortableGit-2.42.0-64-bit.7z.exe"
-        # Write-Output "URL : $($Url)"
 
         $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
         Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
