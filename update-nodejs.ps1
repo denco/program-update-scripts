@@ -43,6 +43,7 @@ function  Update-NodeJs {
     $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/nodejs/node.git" `
                             | Select-String -Pattern "{}" -NotMatch `
                             | Select-String -Pattern "v$($NodeMajorVersion)" -SimpleMatch `
+                            | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split 'v')[1] } `
                             | Select-Object -Last 1
                         )".Trim().Split("/")[2].Replace("v", "")
 
