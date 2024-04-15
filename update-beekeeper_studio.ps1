@@ -49,26 +49,31 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
     $OldPath = Get-Location
 
-    # https://github.com/beekeeper-studio/beekeeper-studio/releases/download/v3.9.20/Beekeeper-Studio-Setup-3.9.20.exe
     $BaseUrl = "https://github.com/beekeeper-studio/beekeeper-studio/releases/download/v$($RemoteLatestTag)"
     $Url ="$($BaseUrl)/$($TargetFileName)"
 
-    $Sha512SumEncoded = "$([System.Text.Encoding]::UTF8.GetString(
-                                                        (Invoke-WebRequest -Uri "$($BaseUrl)/latest.yml").Content
-                                                        ).Split("`n") `
-                | Select-String -Pattern 'sha512:' -AllMatches `
-                | Select-Object -Last 1)".Split(" ")[1].Trim()
+    try {
+        $Sha512SumEncoded = "$([System.Text.Encoding]::UTF8.GetString(
+                                                            (Invoke-WebRequest -Uri "$($BaseUrl)/latest.yml").Content
+                                                            ).Split("`n") `
+                    | Select-String -Pattern 'sha512:' -AllMatches `
+                    | Select-Object -Last 1)".Split(" ")[1].Trim()
 
-    # Write-Output "OLD Path: $($OldPath)"
-    # Write-Output "URL: $($Url)"
-    # Write-Output "SHA: $($Sha512SumEncoded)"
-    $ShaSum = [System.BitConverter]::ToString([System.Convert]::FromBase64String($Sha512SumEncoded)).Replace("-", "").ToLower()
-    # write-Output "Decoded: $($ShaSum)"
+        # Write-Output "OLD Path: $($OldPath)"
+        # Write-Output "URL: $($Url)"
+        # Write-Output "SHA: $($Sha512SumEncoded)"
+        $ShaSum = [System.BitConverter]::ToString([System.Convert]::FromBase64String($Sha512SumEncoded)).Replace("-", "").ToLower()
+        # write-Output "Decoded: $($ShaSum)"
 
-    if ( -not (Test-Path -Path $DownloadFullPath)  ) {
-        $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-        Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
-        $ProgressPreference = 'Continue'
+        if ( -not (Test-Path -Path $DownloadFullPath)  ) {
+
+                $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
+                Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
+                $ProgressPreference = 'Continue'
+        }
+    } catch {
+            Write-Host "Something goes wrong by download!" -ForegroundColor red
+            exit 1
     }
 
     if ((Get-FileHash $DownloadFullPath -Algorithm SHA512).Hash.ToLower() -eq "$($ShaSum)") {
