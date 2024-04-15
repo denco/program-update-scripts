@@ -74,7 +74,6 @@ if ( [System.Version]"$($RemoteLatestTag).0.0" -gt [System.Version]"$($CurrentVe
     Invoke-WebRequest -Uri "$($Url).asc" -OutFile "$($DownloadFullPath).asc"
     $ProgressPreference = 'Continue'
 
-    # && Start-MpScan -ScanPath $DownloadFullPath `
     if ((Get-FileHash $DownloadFullPath -Algorithm SHA512).Hash.ToLower() -eq "$($ShaSum)") {
         Move-Item $TargetDir $BackupDir `
             && Write-Output "check signature" `
@@ -91,7 +90,6 @@ if ( [System.Version]"$($RemoteLatestTag).0.0" -gt [System.Version]"$($CurrentVe
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Write-Output "updated to version: $($RemoteLatestTag)" `
         || Move-Item $BackupDir $TargetDir
-        # /mnt/c/Users/denis.baumgaertner/AppData/Local/NetBeans
     }
 } else {
     Write-Output "Nothing to update."
