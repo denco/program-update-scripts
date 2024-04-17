@@ -66,7 +66,8 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Write-Output "extract" `
             && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir)" > nul `
             && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
-            && Move-Item "$($BackupDir)\SumatraPDF-settings.txt" $TargetDir `
+            && (Move-Item "$($BackupDir)\SumatraPDF-settings.txt" $TargetDir > nul 2>&1 || Write-Output "No settings file") `
+            && Move-Item "$($TargetDir)\SumatraPDF*.exe" "$($TargetDir)\SumatraPDF.exe" `
             && Write-Output "cleanup" `
             && Set-Location $OldPath `
             && Remove-Item -Path $DownloadFullPath -Force `
