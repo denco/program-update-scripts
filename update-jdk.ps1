@@ -48,8 +48,8 @@ function  Update-Jdk {
         New-Item -Path "$($TargetPath)\jdk" -Name "$($JdkMajorVersion)" -ItemType "directory" -ErrorAction SilentlyContinue
     }
 
-    $RemoteVersion = "$($RemoteLatestTag.Replace("+", ".")).0.0" -replace '^(\d+\.\d+\.\d+).+$', '$1'
-    $LocalVersion = "$($CurrentVersion.Replace("+", ".")).0.0" -replace '^(\d+\.\d+\.\d+).+$', '$1'
+    $RemoteVersion = "$(($RemoteLatestTag -replace '\+.+$', '').Replace("+", ".")).0.0" -replace '^(\d+\.\d+\.\d+).+$', '$1'
+    $LocalVersion = "$(($CurrentVersion -replace '\+.+$', '').Replace("+", ".")).0.0" -replace '^(\d+\.\d+\.\d+).+$', '$1'
 
     if ( [System.Version]$($RemoteVersion) -gt [System.Version]$($LocalVersion) ) {
         Write-Output "update needed to: $($RemoteLatestTag)"
