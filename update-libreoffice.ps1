@@ -48,9 +48,7 @@ $ProgressPreference = 'Continue'
 
 $CurrentVersion = "0.0.0"
 if ( Test-Path -Path $TargetDir ) {
-    $CurrentVersion = (get-content "$($TargetDir)\program\version.ini"
-                        | Where-Object {$_ -match "="}
-                        | ConvertFrom-StringData).MsiProductVersion
+    $CurrentVersion = (get-content "$($TargetDir)\VERSION" -raw).Trim()
 } else {
     # create new empty dir as backup fallback
     New-Item -Path "$($TargetPath)" -Name "libreoffice" -ItemType "directory" > nul
@@ -98,6 +96,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
             && Write-Output "extract" `
             && Start-Process -NoNewWindow msiexec.exe -ArgumentList "/a $($DownloadFullPath) /qb TARGETDIR=$($TargetDir)" -Wait `
+            && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
             && Write-Output "cleanup" `
             && Remove-Item -Path $DownloadFullPath -Force `
             && Remove-Item -Path "$($DownloadFullPath).asc" -Force `
