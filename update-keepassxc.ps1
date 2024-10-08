@@ -29,7 +29,7 @@ $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/keepassxreboot/ke
                     )".Trim().Split('/')[2]
 
 $CurrentVersion = "0.0.0"
-if ( Test-Path -Path $TargetDir ) {
+if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
     $CurrentVersion = (get-content "$($TargetDir)\VERSION" -raw).Trim()
 } else {
     # create new empty dir as backup fallback
