@@ -24,13 +24,14 @@ Write-Output "check updates for: insomnia"
 
 
 $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/Kong/insomnia.git" `
-                        | Select-String -Pattern "alpha|beta|\{\}" -NotMatch `
+                        | Select-String -Pattern "alpha|beta|\{\}|20\d\d" -NotMatch `
                         | Select-String -Pattern "core@" -AllMatches `
+                        | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '@')[1] } `
                         | Select-Object -Last 1
                     )".Trim().Split('@')[1]
 
 $CurrentVersion = "0.0.0"
-if ( Test-Path -Path $TargetDir ) {
+if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
     $CurrentVersion = (get-content "$($TargetDir)\VERSION" -raw).Trim()
 } else {
     # create new empty dir as backup fallback
