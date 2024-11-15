@@ -13,7 +13,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1
             )"
 
@@ -79,7 +79,7 @@ if ( [System.Version]"$($RemoteLatestTag).0.0" -gt [System.Version]"$($CurrentVe
             && Write-Output "check signature" `
             && & $gpg --verify "$($DownloadFullPath).asc" $DownloadFullPath >nul 2>&1 `
             && Write-Output "check malware" `
-            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
+            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
             && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir).new" > nul `
             && Move-Item "$($TargetDir).new\netbeans" $TargetDir `

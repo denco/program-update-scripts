@@ -9,7 +9,7 @@ $TargetPath = "$($env:LOCALAPPDATA)\Programs"
 $vScanner = "$(Get-Childitem –Path 'C:\ProgramData\Microsoft\Windows Defender\Platform' `
                              -Include *MpCmdRun.exe* -File -Recurse -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1)"
 
 # gpg
@@ -93,7 +93,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Write-Output "check signature" `
             && & $gpg --verify "$($DownloadFullPath).asc" $DownloadFullPath >nul 2>&1 `
             && Write-Output "check malware" `
-            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
+            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
             && Start-Process -NoNewWindow msiexec.exe -ArgumentList "/a $($DownloadFullPath) /qb TARGETDIR=$($TargetDir)" -Wait `
             && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `

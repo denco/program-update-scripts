@@ -12,7 +12,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1
             )"
 
@@ -84,7 +84,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
         Move-Item $TargetFile $BackupFile `
             && Write-Output "check malware" `
-            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
+            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
             && & $7Zip x "$($DownloadFullPath)" "terraform.exe" -y -o"$($TargetPath)\bin" > nul `
             && Remove-Item -Path $BackupFile -Force `

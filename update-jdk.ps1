@@ -12,7 +12,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1
             )"
 
@@ -54,7 +54,7 @@ function  Update-Jdk {
     if ( [System.Version]$($RemoteVersion) -gt [System.Version]$($LocalVersion) ) {
         Write-Output "update needed to: $($RemoteLatestTag)"
 
-        $TargetFileName = "OpenJDK$($JdkMajorVersion)U-jdk_x64_windows_hotspot_$($RemoteLatestTag -replace '\+(\d)?\.?\d?', '_$1').zip"
+        $TargetFileName = "OpenJDK$($JdkMajorVersion)U-jdk_x64_windows_hotspot_$($RemoteLatestTag -replace '\+(\d+)?\.?\d?', '_$1').zip"
         $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
 
         $Url ="https://github.com/adoptium/temurin$($JdkMajorVersion)-binaries/releases/download/jdk-$($RemoteLatestTag)/$($TargetFileName)"
@@ -91,7 +91,7 @@ function  Update-Jdk {
                     && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
                     && Write-Output "extract" `
                     && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir).new" -y > nul `
-                    && Move-Item "$($TargetDir).new\jdk-$($RemoteLatestTag -replace '\+(\d)?\.?\d?', '+$1')" $TargetDir `
+                    && Move-Item "$($TargetDir).new\jdk-*" $TargetDir `
                     && Write-Output "cleanup" `
                     && Remove-Item -Path $DownloadFullPath -Force `
                     && Remove-Item -Path "$($DownloadFullPath).sig" -Force `

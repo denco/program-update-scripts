@@ -12,7 +12,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1
             )"
 
@@ -26,11 +26,11 @@ Write-Output "check updates for: 7-Zip"
 $MainVersionURL = "https://sourceforge.net/projects/sevenzip/files/7-Zip/"
 
 $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-$RemoteLatestTag = "$((Invoke-WebRequest -Uri $MainVersionURL).Content.Split("`n") `
+# $RemoteLatestTag = "$((Invoke-WebRequest -Uri $MainVersionURL).Content.Split("`n") `
+$RemoteLatestTag = "$((curl -s $MainVersionURL).Split("`n") `
                    | Select-String -Pattern 'class="folder"' -SimpleMatch `
                    | Select-Object -First 1
                 )".Split('"')[3] -replace "(\/[^\/]*){2}$", ""
-
 $ProgressPreference = 'Continue'
 
 
@@ -84,7 +84,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     if ((Get-FileHash $DownloadFullPath -Algorithm SHA1).Hash.ToLower() -eq "$($ShaSum)") {
         Move-Item $TargetDir $BackupDir `
             && Write-Output "check malware" `
-            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
+            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
             && Start-Process -NoNewWindow msiexec.exe -ArgumentList "/a $($DownloadFullPath) /qb TARGETDIR=$($TargetDir).new" -Wait `
             && Set-Location $(join-path "$($TargetDir).new" 'Files') `

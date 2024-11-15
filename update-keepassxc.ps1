@@ -9,7 +9,7 @@ $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 $vScanner = "$(Get-Childitem –Path 'C:\ProgramData\Microsoft\Windows Defender\Platform' `
                              -Include *MpCmdRun.exe* -Exclude -File -Recurse -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1)"
 
 # gpg

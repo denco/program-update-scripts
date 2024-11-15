@@ -11,7 +11,7 @@ $vScanner = "$(Get-Childitem `
                 -Recurse `
                 -ErrorAction SilentlyContinue `
             | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime -Descending `
+            | Sort-Object LastWriteTime `
             | Select-Object -Last 1
             )"
 
@@ -58,7 +58,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
         # Write-Output "ok"
         Move-Item $TargetDir $BackupDir `
             && Write-Output "check malware" `
-            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath >nul `
+            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
             && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir).new" >nul `
             && Move-Item "$($TargetDir).new\dbeaver" $TargetDir `
