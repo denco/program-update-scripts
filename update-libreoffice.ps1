@@ -6,11 +6,7 @@ $TargetPath = "$($env:LOCALAPPDATA)\Programs"
 
 # $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 
-$vScanner = "$(Get-Childitem –Path 'C:\ProgramData\Microsoft\Windows Defender\Platform' `
-                             -Include *MpCmdRun.exe* -File -Recurse -ErrorAction SilentlyContinue `
-            | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime `
-            | Select-Object -Last 1)"
+$vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 # gpg
 # gpg --receive-keys C2839ECAD9408FBE9531C3E9F434A1EFAFEEAEA3
@@ -54,10 +50,8 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
     New-Item -Path "$($TargetPath)" -Name "libreoffice" -ItemType "directory" > nul
 }
 
-# Write-Output "remote: >$($RemoteLatestTag)<"
-# Write-Output "local : >$($CurrentVersion)<"
-
-if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
+if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersion)" ) {
+    exit
     Write-Output "update needed to: $($RemoteLatestTag)"
 
     $Platform = "Win"

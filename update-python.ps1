@@ -3,16 +3,7 @@
 
 $TargetPath = "$($env:LOCALAPPDATA)\Programs"
 
-$vScanner = "$(Get-Childitem `
-                –Path 'C:\ProgramData\Microsoft\Windows Defender\Platform' `
-                -Include *MpCmdRun.exe* `
-                -File `
-                -Recurse `
-                -ErrorAction SilentlyContinue `
-            | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime `
-            | Select-Object -Last 1
-            )"
+$vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 # gpg
 # gpg --recv-key FC624643487034E5

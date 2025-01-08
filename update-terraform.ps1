@@ -5,16 +5,7 @@ $TargetPath = "$($env:LOCALAPPDATA)\Programs"
 
 $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 
-$vScanner = "$(Get-Childitem `
-                –Path 'C:\ProgramData\Microsoft\Windows Defender\Platform' `
-                -Include *MpCmdRun.exe* `
-                -File `
-                -Recurse `
-                -ErrorAction SilentlyContinue `
-            | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime `
-            | Select-Object -Last 1
-            )"
+$vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 # # gpg
 # # gpg --receive-keys C874011F0AB405110D02105534365D9472D7468F
