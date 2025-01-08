@@ -5,16 +5,7 @@ $TargetPath = "$($env:LOCALAPPDATA)\Programs"
 
 # $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 
-$vScanner = "$(Get-Childitem `
-                –Path 'C:\ProgramData\Microsoft\Windows Defender\Platform' `
-                -Include *MpCmdRun.exe* `
-                -File `
-                -Recurse `
-                -ErrorAction SilentlyContinue `
-            | Where-Object { $_.FullName -NotMatch 'X86' } `
-            | Sort-Object LastWriteTime `
-            | Select-Object -Last 1
-            )"
+$vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 # $gpg  = "$($TargetPath)\git\usr\bin\gpg.exe"
 
@@ -26,8 +17,7 @@ Write-Output "check updates for: 7-Zip"
 $MainVersionURL = "https://sourceforge.net/projects/sevenzip/files/7-Zip/"
 
 $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-# $RemoteLatestTag = "$((Invoke-WebRequest -Uri $MainVersionURL).Content.Split("`n") `
-$RemoteLatestTag = "$((curl -s $MainVersionURL).Split("`n") `
+$RemoteLatestTag = "$((Invoke-WebRequest -Uri $MainVersionURL).Content.Split("`n") `
                    | Select-String -Pattern 'class="folder"' -SimpleMatch `
                    | Select-Object -First 1
                 )".Split('"')[3] -replace "(\/[^\/]*){2}$", ""
@@ -37,8 +27,8 @@ $ProgressPreference = 'Continue'
 $RemoteLatestTag = $RemoteLatestTag.Split("/")[-1]
 
 $CurrentVersion = "0.0"
-if ( Test-Path -Path $TargetDir ) {
-    $CurrentVersion = "$(Get-Content "$($TargetDir)\readme.txt" -First 1)".Trim().Split(" ")[1]
+if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
+    $CurrentVersion = (get-content "$($TargetDir)\VERSION" -raw).Trim()
 } else {
     # create new empty dir as backup fallback
     New-Item -Path "$($TargetPath)" -Name "7-Zip" -ItemType "directory" > nul
@@ -89,6 +79,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Start-Process -NoNewWindow msiexec.exe -ArgumentList "/a $($DownloadFullPath) /qb TARGETDIR=$($TargetDir).new" -Wait `
             && Set-Location $(join-path "$($TargetDir).new" 'Files') `
             && Move-Item '7*' $TargetDir `
+            && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
             && Write-Output "cleanup" `
             && Set-Location $OldPath `
             && Remove-Item -Path $DownloadFullPath -Force `
