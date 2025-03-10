@@ -81,7 +81,7 @@ function  Update-NodeJs {
         #         # && Start-MpScan -ScanPath $DownloadFullPath -ScanType CustomScan `
                 if ((Get-FileHash $DownloadFullPath -Algorithm SHA256).Hash.ToLower() -eq "$($ShaSum)") {
                     # Write-Output "ok"
-                    Move-Item $TargetDir $BackupDir `
+                    Rename-Item $TargetDir $BackupDir `
                         && Write-Output "check malware" `
                         && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
                         && Write-Output "extract" `
@@ -93,7 +93,7 @@ function  Update-NodeJs {
                         && Remove-Item -Path "$($env:TEMP)\SHASUMS256.txt.asc" -Force `
                         && Remove-Item -Path $BackupDir -Recurse -Force `
                         && Write-Output "updated to version: $($RemoteLatestTag)" `
-                    || Move-Item $BackupDir $TargetDir
+                    || Rename-Item $BackupDir $TargetDir
                 }
             } catch {
                 Write-Output "Something goes wrong by download of file: $($TargetFileName)!"
