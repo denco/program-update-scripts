@@ -8,6 +8,7 @@ $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 $vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 $ToolName = "vscodium"
+$ToolUpdateDelayDays = 3
 $TargetDir = "$($TargetPath)\$($ToolName)"
 $BackupDir = "$($TargetDir).bak"
 $ToolRepoBaseUrl = "https://github.com/VSCodium/$($ToolName)"
@@ -20,15 +21,29 @@ $RemoteLatestTag = "$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
                     )".Trim().Split('/')[2]
 
 $CurrentVersion = "0.0.0.0"
+$UpdateNotBefore = -1
 if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
-    $CurrentVersion = (get-content "$($TargetDir)\VERSION" -raw).Trim()
+    [string[]] $VersionFileContent = Get-Content "$($TargetDir)\VERSION"
+    # get current version
+    $CurrentVersion = $VersionFileContent[0].Trim()
+
+    if ( $VersionFileContent.Length -gt 1 ) {
+        $UpdateNotBefore = [int64]($VersionFileContent[1]).Trim()
+    }
 } else {
     # create new empty dir as backup fallback
     New-Item -Path "$($TargetPath)" -Name "$($ToolName)" -ItemType "directory" -erroraction 'SilentlyContinue' > nul
 }
 
-
-if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
+$Now = [int64](Get-Date -AsUTC -UFormat "%s")
+# check update is needed, but will be delayed
+if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion -And $UpdateNotBefore -eq -1 ) {
+    $NotBefore = [int64](Get-Date -AsUTC -UFormat "%s") + (24 * 3600 * $ToolUpdateDelayDays)
+    Write-Output "Update will be delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $NotBefore -UFormat "%F %T")"
+    Write-Output "$($CurrentVersion)`r`n$($NotBefore)" > "$($TargetDir)\VERSION"
+}
+# check update is needed and is allowed
+elseif ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion -And $Now -gt $UpdateNotBefore ) {
     Write-Output "update needed to: $($RemoteLatestTag)"
 
     $TargetFileName = "VSCodium-win32-x64-$($RemoteLatestTag).zip"
