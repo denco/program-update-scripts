@@ -51,7 +51,6 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
 }
 
 if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersion)" ) {
-    exit
     Write-Output "update needed to: $($RemoteLatestTag)"
 
     $Platform = "Win"
