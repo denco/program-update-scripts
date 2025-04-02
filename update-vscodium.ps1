@@ -15,7 +15,7 @@ $ToolRepoBaseUrl = "https://github.com/VSCodium/$($ToolName)"
 
 Write-Output "check updates for: $($ToolName)"
 
-$RemoteLatestTag = "$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
+$RemoteLatestTag = [System.Version]"$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
                         | Select-String -Pattern "alpha|beta|\{\}" -NotMatch `
                         | Select-Object -Last 1
                     )".Trim().Split('/')[2]
@@ -25,10 +25,13 @@ $UpdateNotBefore = -1
 if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
     [string[]] $VersionFileContent = Get-Content "$($TargetDir)\VERSION"
     # get current version
-    $CurrentVersion = $VersionFileContent[0].Trim()
+    $CurrentVersion = [System.Version]$VersionFileContent[0].Trim()
 
     if ( $VersionFileContent.Length -gt 1 ) {
         $UpdateNotBefore = [int64]($VersionFileContent[1]).Trim()
+    }
+    if ( $VersionFileContent.Length -gt 2 ) {
+        $postponedUpdateVersion = [System.Version]($VersionFileContent[2]).Trim()
     }
 } else {
     # create new empty dir as backup fallback
@@ -37,13 +40,21 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
 
 $Now = [int64](Get-Date -AsUTC -UFormat "%s")
 # check update is needed, but will be delayed
-if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion -And $UpdateNotBefore -eq -1 ) {
+if ( $RemoteLatestTag -gt $CurrentVersion -And $UpdateNotBefore -eq -1 ) {
     $NotBefore = [int64](Get-Date -AsUTC -UFormat "%s") + (24 * 3600 * $ToolUpdateDelayDays)
     Write-Output "Update will be delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $NotBefore -UFormat "%F %T")"
-    Write-Output "$($CurrentVersion)`r`n$($NotBefore)" > "$($TargetDir)\VERSION"
+    Write-Output "$($CurrentVersion)`r`n$($NotBefore)`r`n$($RemoteLatestTag)" > "$($TargetDir)\VERSION"
+}
+elseif ( $RemoteLatestTag -eq $postponedUpdateVersion -And $Now -lt $UpdateNotBefore){
+    Write-Output "Update to: $($RemoteLatestTag) is delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $UpdateNotBefore -UFormat "%F %T")"
+}
+elseif ( $RemoteLatestTag -gt $postponedUpdateVersion -And $Now -lt $UpdateNotBefore){
+    $NotBefore = [int64](Get-Date -AsUTC -UFormat "%s") + (24 * 3600 * $ToolUpdateDelayDays)
+    Write-Output "Latest version: $($RemoteLatestTag) is greater then postponed: $($postponedUpdateVersion) update will be delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $NotBefore -UFormat "%F %T")"
+    Write-Output "$($CurrentVersion)`r`n$($NotBefore)`r`n$($RemoteLatestTag)" > "$($TargetDir)\VERSION"
 }
 # check update is needed and is allowed
-elseif ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion -And $Now -gt $UpdateNotBefore ) {
+elseif ( $RemoteLatestTag -gt $CurrentVersion -And $Now -gt $UpdateNotBefore ) {
     Write-Output "update needed to: $($RemoteLatestTag)"
 
     $TargetFileName = "VSCodium-win32-x64-$($RemoteLatestTag).zip"
