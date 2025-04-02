@@ -20,7 +20,7 @@ Write-Output "check updates for: keepassxc"
 
 $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/keepassxreboot/keepassxc.git" `
                         | Select-String -Pattern "-|{}|latest" -NotMatch `
-                        | Sort-Object -erroraction 'SilentlyContinue' { ("$_" -split '/')[2] } `
+                        | Sort-Object -erroraction 'SilentlyContinue' { [System.Version]("$_" -split '/')[2] } `
                         | Select-Object -Last 1
                     )".Trim().Split('/')[2]
 
