@@ -17,11 +17,11 @@ $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/dbeaver/dbeaver.g
                     )".Trim().Split('/')[2]
 
 $CurrentVersion = "0.0.0"
-if ( Test-Path -Path $TargetDir ) {
+if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\.eclipseproduct )) {
     $CurrentVersion = (Convertfrom-Stringdata (get-content "$($TargetDir)\.eclipseproduct" -raw))."version"
 } else {
     # create new empty dir as backup fallback
-    New-Item -Path "$($TargetPath)" -Name "dbeaver" -ItemType "directory" > nul
+    New-Item -Path "$($TargetPath)" -Name "dbeaver" -ItemType "directory" > nul 2>&1
 }
 
 # Write-Output "remote: >$($RemoteLatestTag)<"
@@ -35,7 +35,8 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
 
     $Url ="https://github.com/dbeaver/dbeaver/releases/download/$($RemoteLatestTag)/$($TargetFileName)"
 
-    $Sha256Sum = (Invoke-WebRequest -Uri "https://dbeaver.io/files/$($RemoteLatestTag)/checksum/$($TargetFileName).sha256").Content.Trim()
+    $Sha256Sum = (Invoke-WebRequest -Uri "https://dbeaver.io/files/$($RemoteLatestTag)/checksum/$($TargetFileName).sha256").Content
+    $Sha256Sum = [System.Text.Encoding]::UTF8.GetString($Sha256Sum).Trim()
 
     if ( -not (Test-Path -Path $DownloadFullPath)  ) {
         $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
@@ -47,7 +48,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
 
     if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
         # Write-Output "ok"
-        Move-Item $TargetDir $BackupDir `
+        Rename-Item $TargetDir $BackupDir `
             && Write-Output "check malware" `
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
@@ -57,7 +58,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Remove-Item -Path "$($TargetDir).new" -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Write-Output "updated to version: $($RemoteLatestTag)" `
-        || Move-Item $BackupDir $TargetDir
+        || Rename-Item $BackupDir $TargetDir
     }
 } else {
     Write-Output "Nothing to update."
