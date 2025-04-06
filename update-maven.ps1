@@ -60,7 +60,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     $ProgressPreference = 'Continue'
 
     if ((Get-FileHash $DownloadFullPath -Algorithm SHA512).Hash.ToLower() -eq "$($CheckSum.ToLower())") {
-        Move-Item $TargetDir $BackupDir `
+        Rename-Item $TargetDir $BackupDir `
             && Write-Output "check signature" `
             && & $gpg --verify "$($DownloadFullPath).asc" $DownloadFullPath >nul 2>&1 `
             && Write-Output "check malware" `
@@ -75,7 +75,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Remove-Item -Path "$($DownloadFullPath).asc" -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Write-Output "updated to version: $($RemoteLatestTag)"
-        || Move-Item $BackupDir $TargetDir
+        || Rename-Item $BackupDir $TargetDir
     }
 } else {
     Write-Output "Nothing to update."

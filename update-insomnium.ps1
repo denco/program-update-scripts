@@ -52,7 +52,7 @@ if ( [System.Version]$RemoteLatestTag.Split('-')[0] -gt [System.Version]$Current
     }
 
     if ((Get-FileHash $DownloadFullPath -Algorithm SHA1).Hash.ToLower() -eq "$($ShaSum.ToLower())") {
-        Move-Item $TargetDir $BackupDir `
+        Rename-Item $TargetDir $BackupDir `
             && Write-Output "check malware" `
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && Write-Output "extract" `
@@ -66,7 +66,7 @@ if ( [System.Version]$RemoteLatestTag.Split('-')[0] -gt [System.Version]$Current
             && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Write-Output "updated to version: $($RemoteLatestTag)"
-        || Move-Item $BackupDir $TargetDir
+        || Rename-Item $BackupDir $TargetDir
     }
 } else {
     Write-Output "Nothing to update."

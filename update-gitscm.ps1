@@ -95,13 +95,13 @@ if ( [System.Version]($GitRemoteLatestTag -replace '\.windows.*', '') -gt [Syste
     }
 
     if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
-        Move-Item $TargetDir $BackupDir `
+        Rename-Item $TargetDir $BackupDir `
             && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
             && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir)" > nul `
             && Remove-Item -Path $DownloadFullPath -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Write-Output "updated to version: $($GitRemoteLatestTag)" `
-        || Move-Item $BackupDir $TargetDir
+        || Rename-Item $BackupDir $TargetDir
     }
 } else {
     Write-Output "Nothing to update."

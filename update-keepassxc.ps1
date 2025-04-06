@@ -63,7 +63,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
 
     # # && Start-MpScan -ScanPath $DownloadFullPath `
     if ((Get-FileHash $DownloadFullPath -Algorithm SHA256).Hash.ToLower() -eq "$($ShaSum.ToLower())") {
-        Move-Item $TargetDir $BackupDir `
+        Rename-Item $TargetDir $BackupDir `
             && Write-Output "check signature" `
             && & $gpg --verify "$($DownloadFullPath).sig" $DownloadFullPath >nul 2>&1 `
             && Write-Output "check malware" `
@@ -79,7 +79,7 @@ if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
             && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
             && Write-Output "updated to version: $($RemoteLatestTag)" `
-        || Move-Item $BackupDir $TargetDir
+        || Rename-Item $BackupDir $TargetDir
     }
 } else {
     Write-Output "Nothing to update."
