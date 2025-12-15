@@ -39,7 +39,7 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
 if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     Write-Output "update needed to: $($RemoteLatestTag)"
 
-    $TargetFileName = "KeePassXC-$($RemoteLatestTag)-Win64-LegacyWindows.zip"
+    $TargetFileName = "KeePassXC-$($RemoteLatestTag)-Win64.zip"
     $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
 
 
