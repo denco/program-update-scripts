@@ -68,9 +68,6 @@ function  Update-Jdk {
             $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
             Invoke-WebRequest -Uri "$($Url).sig" -OutFile "$($DownloadFullPath).sig"
             $ProgressPreference = 'Continue'
-        } catch {
-            Write-Output "Something goes wrong by download of file: $($TargetFileName)!"
-        }
 
             # && Start-MpScan -ScanPath $DownloadFullPath -ScanType CustomScan `
             if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
@@ -91,6 +88,9 @@ function  Update-Jdk {
                     && Write-Output "updated to version: $($RemoteLatestTag)" `
                 || Rename-Item $BackupDir $TargetDir
             }
+        } catch {
+            Write-Output "Something goes wrong by download of file: $($TargetFileName)!"
+        }
     } else {
         Write-Output "Nothing to update."
     }
