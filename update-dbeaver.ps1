@@ -13,6 +13,7 @@ Write-Output "check updates for: dbeaver"
 
 $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/dbeaver/dbeaver.git" `
                         | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2] } `
+                        | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2].replace('v','') }
                         | Select-Object -Last 1
                     )".Trim().Split('/')[2]
 
