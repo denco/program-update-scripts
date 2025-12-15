@@ -82,6 +82,7 @@ if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersio
     if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
         # Write-Output "ok"
             # && Start-MpScan -ScanPath $DownloadFullPath -ScanType CustomScan `
+        Get-Process -Name "soffice.bin" | Stop-Process
         Rename-Item $TargetDir $BackupDir `
             && Write-Output "check signature" `
             && & $gpg --verify "$($DownloadFullPath).asc" $DownloadFullPath >nul 2>&1 `
