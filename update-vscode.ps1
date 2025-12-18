@@ -8,7 +8,7 @@ $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 $vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 $ToolName = "vscode"
-$ToolUpdateDelayDays = -1
+$ToolUpdateDelayDays = 0
 $TargetDir = "$($TargetPath)\$($ToolName)"
 $BackupDir = "$($TargetDir).bak"
 $ToolRepoBaseUrl = "https://github.com/microsoft/$($ToolName)"
@@ -20,7 +20,7 @@ $RemoteLatestTag = [System.Version]"$(git ls-remote --tags "$($ToolRepoBaseUrl).
                         | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2] } `
                         | Select-Object -Last 1
                     )".Trim().Split('/')[2]
-exit
+
 $CurrentVersion = "0.0.0.0"
 
 $UpdateNotBefore = -1
@@ -86,6 +86,8 @@ elseif ( $RemoteLatestTag -gt $CurrentVersion -And $Now -gt $UpdateNotBefore ) {
             && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir)" > nul `
             && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
             && Write-Output "cleanup" `
+            && Remove-Item -Path "$($TargetDir)\appx" -Recurse -Force `
+            && Remove-Item -Path "$($TargetDir)\tools" -Recurse -Force `
             && Set-Location $OldPath `
             && Remove-Item -Path $DownloadFullPath -Force `
             && Remove-Item -Path $BackupDir -Recurse -Force `
