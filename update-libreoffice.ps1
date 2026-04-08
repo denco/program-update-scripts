@@ -23,6 +23,7 @@ $MainVersionURL = "https://download.documentfoundation.org/libreoffice/stable/"
 $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
 $MainVersion = "$((Invoke-WebRequest -Uri "$($MainVersionURL)?C=M;O=A").Content.Split("`n") `
                     | Select-string -Pattern "top" -AllMatches -Context 0,1 `
+                    | Select-String -Pattern "\d+\.\d+\.\d+" -AllMatches `
                     | Select-Object -Last 1
                 )".Split('href')[1].Split('"')[1].Replace('/', '')
 $ProgressPreference = 'Continue'
@@ -51,6 +52,10 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
 }
 
 if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersion)" ) {
+    try {
+        Get-Process -Name "soffice.bin" | Stop-Process >nul 2>&1
+    } catch {}
+
     Write-Output "update needed to: $($RemoteLatestTag)"
 
     $Platform = "Win"
@@ -82,7 +87,6 @@ if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersio
     if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
         # Write-Output "ok"
             # && Start-MpScan -ScanPath $DownloadFullPath -ScanType CustomScan `
-        Get-Process -Name "soffice.bin" | Stop-Process
         Rename-Item $TargetDir $BackupDir `
             && Write-Output "check signature" `
             && & $gpg --verify "$($DownloadFullPath).asc" $DownloadFullPath >nul 2>&1 `

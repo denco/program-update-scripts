@@ -15,7 +15,7 @@ $ToolRepoBaseUrl = "https://github.com/VSCodium/$($ToolName)"
 
 Write-Output "check updates for: $($ToolName)"
 
-$RemoteLatestTag = [System.Version]"$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
+$RemoteLatestTag = "$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
                         | Select-String -Pattern "alpha|beta|\{\}" -NotMatch `
                         | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2] } `
                         | Select-Object -Last 1

@@ -16,10 +16,10 @@ $BackupFile = "$($TargetFile).bak"
 
 Write-Output "check updates for: terraform"
 
-
 $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
 $RemoteLatestTag = "$(git ls-remote --tags https://github.com/hashicorp/terraform.git `
                       | Select-String -Pattern "-|{}" -NotMatch `
+                      | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2].replace('v','') } `
                       | Select-Object -Last 1
                     )".Trim().Split('/')[2].Replace('v', '')
 $ProgressPreference = 'Continue'

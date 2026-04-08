@@ -23,7 +23,7 @@ $RemoteLatestTag = [System.Version]"$(git ls-remote --tags "$($ToolRepoBaseUrl).
 
 $CurrentVersion = "0.0.0.0"
 
-$UpdateNotBefore = -1
+$UpdateNotBefore = [int64](Get-Date -AsUTC -UFormat "%s") + (24 * 3600 * $ToolUpdateDelayDays)
 if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
     [string[]] $VersionFileContent = Get-Content "$($TargetDir)\VERSION"
     # get current version
@@ -42,10 +42,9 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
 
 $Now = [int64](Get-Date -AsUTC -UFormat "%s")
 # check update is needed, but will be delayed
-if ( $RemoteLatestTag -gt $CurrentVersion -And $UpdateNotBefore -eq -1 ) {
-    $NotBefore = [int64](Get-Date -AsUTC -UFormat "%s") + (24 * 3600 * $ToolUpdateDelayDays)
-    Write-Output "Update will be delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $NotBefore -UFormat "%F %T")"
-    Write-Output "$($CurrentVersion)`r`n$($NotBefore)`r`n$($RemoteLatestTag)" > "$($TargetDir)\VERSION"
+if ( $RemoteLatestTag -gt $CurrentVersion -And $Now -lt $UpdateNotBefore ) {
+    Write-Output "Update will be delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $UpdateNotBefore -UFormat "%F %T")"
+    Write-Output "$($CurrentVersion)`r`n$($UpdateNotBefore)`r`n$($RemoteLatestTag)" > "$($TargetDir)\VERSION"
 }
 elseif ( $RemoteLatestTag -eq $postponedUpdateVersion -And $Now -lt $UpdateNotBefore){
     Write-Output "Update to: $($RemoteLatestTag) is delayed till: $(Get-Date -AsUTC -UnixTimeSeconds $UpdateNotBefore -UFormat "%F %T")"
@@ -56,8 +55,11 @@ elseif ( $RemoteLatestTag -gt $postponedUpdateVersion -And $Now -lt $UpdateNotBe
     Write-Output "$($CurrentVersion)`r`n$($NotBefore)`r`n$($RemoteLatestTag)" > "$($TargetDir)\VERSION"
 }
 # check update is needed and is allowed
-elseif ( $RemoteLatestTag -gt $CurrentVersion -And $Now -gt $UpdateNotBefore ) {
+elseif ( $RemoteLatestTag -gt $CurrentVersion -And $Now -ge $UpdateNotBefore ) {
 
+    if ( ("$($RemoteLatestTag)".Split('.')).Length -eq 2 ) {
+        $RemoteLatestTag = "$($RemoteLatestTag).0"
+    }
     Write-Output "update needed to: $($RemoteLatestTag)"
 
     $TargetFileName = "VSCode-win32-x64-$($RemoteLatestTag).zip"

@@ -68,10 +68,10 @@ function  Update-Python {
             || exit 1
 
             $checkSum =  "$((Invoke-WebRequest -Uri "https://www.python.org/downloads/release/python-$($RemoteLatestTag.Replace('.',''))/").Content.Split('<tr') `
-                            |Select-String -Pattern "https://www.python.org/ftp/python/$($RemoteLatestTag)/$($TargetFileName)" -AllMatches)".Split('<td>')[4].Split('<')[0]
+                            |Select-String -Pattern "https://www.python.org/ftp/python/$($RemoteLatestTag)/$($TargetFileName)" -AllMatches)".Split('SIG')[1].Split('<td>')[1].Split('<')[0]
 
             # Write-Output "checkSum: $($checkSum)"
-            if ((Get-FileHash $DownloadFullPath -Algorithm MD5).Hash.ToLower() -eq "$($checkSum)") {
+            if ((Get-FileHash $DownloadFullPath -Algorithm SHA256).Hash.ToLower() -eq "$($checkSum)") {
                 Write-Output "ok"
                 Rename-Item $TargetDir $BackupDir `
                     && Write-Output "check malware" `

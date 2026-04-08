@@ -52,7 +52,7 @@ if ( [System.Version]"$($RemoteLatestTag).0.0" -gt [System.Version]"$($CurrentVe
 
     $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
     $ShaSum = (Invoke-WebRequest -Uri "$($Url).sha512").Content.Split(" ")[0]
-    # Write-Output "ShaSum: $($ShaSum)"
+    # Write-Output "URL: $($Url).sha512; ShaSum: $($ShaSum)"
     $ProgressPreference = 'Continue'
 
     if ( -not (Test-Path -Path $DownloadFullPath)  ) {

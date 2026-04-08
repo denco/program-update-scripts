@@ -8,7 +8,7 @@ $7Zip = "$($TargetPath)\7-Zip\7z.exe"
 $vScanner = "${env:ProgramFiles}\Windows Defender\MpCmdRun.exe"
 
 $ToolName = "bruno"
-$ToolUpdateDelayDays = 0
+$ToolUpdateDelayDays = 3
 $TargetDir = "$($TargetPath)\$($ToolName)"
 $BackupDir = "$($TargetDir).bak"
 $ToolRepoBaseUrl = "https://github.com/usebruno/$($ToolName)"

@@ -89,7 +89,9 @@ function  Update-Jdk {
                 || Rename-Item $BackupDir $TargetDir
             }
         } catch {
-            Write-Output "Something goes wrong by download of file: $($TargetFileName)!"
+            Write-Output "No update for x64 windows platform"
+            # Write-Output "Something goes wrong by download of file: $($TargetFileName)!"
+            # Write-Output "Download URL: $($Url)"
         }
     } else {
         Write-Output "Nothing to update."
