@@ -23,7 +23,7 @@ function  Update-Jdk {
     Write-Output "check updates for: jdk$($JdkMajorVersion)"
 
     $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/adoptium/temurin$($JdkMajorVersion)-binaries.git" `
-                            | Select-String -Pattern "jdk8u|-beta" -NotMatch `
+                            | Select-String -Pattern "jdk8u|-beta|-ga" -NotMatch `
                             | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '-')[3] } `
                             | Select-Object -Last 1
                         )".Trim().Split('/')[2].Split('-')[1]

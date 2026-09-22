@@ -15,11 +15,15 @@ $ToolRepoBaseUrl = "https://github.com/desktop/desktop"
 
 Write-Output "check updates for: $($ToolName)"
 
-$RemoteLatestTag = [System.Version]"$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
-                        | Select-String -Pattern "alpha|beta|test|demo|\{\}" -NotMatch `
+                        # | Select-String -Pattern "alpha|beta|test|demo|tmp|\{\}" -NotMatch `
+$RemoteLatestTag = "$(git ls-remote --tags "$($ToolRepoBaseUrl).git" `
+                        | Select-String -Pattern "release-\d+\.\d+.\d+$" -AllMatches `
                         | Sort-Object -erroraction 'SilentlyContinue' {($_ -split '/')[2].Replace('release-','')} `
                         | Select-Object -Last 1
-                    )".Trim().Split('/')[2].Replace('release-', '')
+                    )".Trim()
+
+$RemoteLatestTagHash = $RemoteLatestTag.Substring(0,8)
+$RemoteLatestTag = [System.Version]$RemoteLatestTag.Split('/')[2].Replace('release-', '')
 
 $CurrentVersion = "0.0.0"
 $UpdateNotBefore = -1
@@ -57,42 +61,43 @@ elseif ( $RemoteLatestTag -gt $postponedUpdateVersion -And $Now -lt $UpdateNotBe
 # check update is needed and is allowed
 elseif ( $RemoteLatestTag -gt $CurrentVersion -And $Now -gt $UpdateNotBefore ) {
     Write-Output "update needed to: $($RemoteLatestTag)"
-    # Write-Output "LINK: https://github.com/desktop/desktop/releases/tag/release-3.5.3"
-    # Write-Output "VERSION FULL-PATH LINK: https://github.com/desktop/desktop/releases/download/release-3.5.3/GitHubDesktop-3.5.3-x64-full.nupkg"
 
     $TargetFileName = "GitHubDesktop-$($RemoteLatestTag)-x64-full.nupkg"
     $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
     $OldPath = Get-Location
 
-    $DownloadBaseUrl ="$($ToolRepoBaseUrl)/releases/download/release-$($RemoteLatestTag)"
-    $Url ="$($DownloadBaseUrl)/$($TargetFileName)"
-    $CheckSumUrl ="$($DownloadBaseUrl)/GitHub.Desktop-$($RemoteLatestTag)-checksums.txt"
-    $CheckSum = "$([System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri "$($CheckSumUrl)").Content).Split("`n") `
-                   | Select-String "$($TargetFileName)")".Split(" ")[0]
-# Write-Output "CheckSum: $CheckSum"
+    try {
+        $DownloadBaseUrl ="$($ToolRepoBaseUrl)/releases/download/release-$($RemoteLatestTag)"
+        $Url ="$($DownloadBaseUrl)/$($TargetFileName)"
+        $CheckSumUrl ="$($DownloadBaseUrl)/GitHub.Desktop-$($RemoteLatestTag)-checksums.txt"
+        $CheckSum = "$([System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri "$($CheckSumUrl)").Content).Split("`n") `
+                    | Select-String "$($TargetFileName)")".Split(" ")[0]
 
-    if ( -not (Test-Path -Path $DownloadFullPath)  ) {
-        $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-        Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
-        $ProgressPreference = 'Continue'
-    }
+        if ( -not (Test-Path -Path $DownloadFullPath)  ) {
+            $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
+            Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
+            $ProgressPreference = 'Continue'
+        }
 
-    if ((Get-FileHash $DownloadFullPath -Algorithm SHA256).Hash.ToLower() -eq "$($CheckSum.ToLower())") {
-        Write-Output "checksum: OK!"
-        Rename-Item $TargetDir $BackupDir `
-            && Write-Output "check malware" `
-            && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
-            && Write-Output "extract" `
-            && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir).new" > nul `
-            && Move-Item "$($TargetDir).new\lib\net45" $TargetDir `
-            && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
-            && Write-Output "cleanup" `
-            && Set-Location $OldPath `
-            && Remove-Item -Path $DownloadFullPath -Force `
-            && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `
-            && Remove-Item -Path $BackupDir -Recurse -Force `
-            && Write-Output "updated to version: $($RemoteLatestTag)"
-        || Rename-Item $BackupDir $TargetDir
+        if ((Get-FileHash $DownloadFullPath -Algorithm SHA256).Hash.ToLower() -eq "$($CheckSum.ToLower())") {
+            Write-Output "checksum: OK!"
+            Rename-Item $TargetDir $BackupDir `
+                && Write-Output "check malware" `
+                && & $vScanner -Scan -ScanType 3 -File $DownloadFullPath `
+                && Write-Output "extract" `
+                && & $7Zip x "$($DownloadFullPath)" -o"$($TargetDir).new" > nul `
+                && Move-Item "$($TargetDir).new\lib\net45" $TargetDir `
+                && Write-Output "$($RemoteLatestTag)" > "$($TargetDir)\VERSION" `
+                && Write-Output "cleanup" `
+                && Set-Location $OldPath `
+                && Remove-Item -Path $DownloadFullPath -Force `
+                && Remove-Item -Path "$($TargetDir).new" -Recurse -Force `
+                && Remove-Item -Path $BackupDir -Recurse -Force `
+                && Write-Output "updated to version: $($RemoteLatestTag)"
+            || Rename-Item $BackupDir $TargetDir
+        }
+    } catch {
+        Write-Output "No download artifact available"
     }
 } else {
     Write-Output "Nothing to update."

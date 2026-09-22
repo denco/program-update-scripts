@@ -50,7 +50,7 @@ function  Update-Python {
         $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
 
         $Url ="https://www.python.org/ftp/python/$($RemoteLatestTag)"
-        try {
+        # try {
             if ( -not (Test-Path -Path $DownloadFullPath)  ) {
                 $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
                 Write-Output "download"
@@ -58,19 +58,36 @@ function  Update-Python {
                 $ProgressPreference = 'Continue'
             }
 
+            if ([System.Version]$($RemoteLatestTag) -lt [System.Version]'3.14' ) {
+                $SignatureFileExtension="asc"
+            } else {
+                $SignatureFileExtension="sigstore"
+            }
+
             # get signature
             $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-            Invoke-WebRequest -Uri "$($Url)/$($TargetFileName).asc" -OutFile "$($DownloadFullPath).asc"
+            Invoke-WebRequest -Uri "$($Url)/$($TargetFileName).$($SignatureFileExtension)" -OutFile "$($DownloadFullPath).$($SignatureFileExtension)"
             $ProgressPreference = 'Continue'
 
-            Write-Output "check signature" `
-            && & $gpg --verify "$($DownloadFullPath).asc"  >nul 2>&1 `
-            || exit 1
+            if ([System.Version]$($RemoteLatestTag) -lt [System.Version]'3.14' ) {
+                Write-Output "check signature" `
+                && & $gpg --verify "$($DownloadFullPath).$($SignatureFileExtension)"  >nul 2>&1 `
+                || Invoke-command -ScriptBlock {exit 1}
+                # || exit 1
+            } else {
+                Write-Output "COSIGN"
+                cosign verify-blob "$($DownloadFullPath)" `
+                    --bundle "$($DownloadFullPath).$($SignatureFileExtension)" `
+                    --cert-identity hugo@python.org `
+                    --certificate-oidc-issuer https://github.com/login/oauth `
+                || Invoke-command -ScriptBlock {exit 1}
+            }
 
-            $checkSum =  "$((Invoke-WebRequest -Uri "https://www.python.org/downloads/release/python-$($RemoteLatestTag.Replace('.',''))/").Content.Split('<tr') `
-                            |Select-String -Pattern "https://www.python.org/ftp/python/$($RemoteLatestTag)/$($TargetFileName)" -AllMatches)".Split('SIG')[1].Split('<td>')[1].Split('<')[0]
+            $checkSum =  ("$((Invoke-WebRequest -Uri "https://www.python.org/downloads/release/python-$($RemoteLatestTag.Replace('.',''))/").Content.Split('<tr') `
+                            |Select-String -Pattern "https://www.python.org/ftp/python/$($RemoteLatestTag)/$($TargetFileName)" -AllMatches)".Split('td')[-2].Split('>')[3,4,7,8]).Split('<')[0,2,4,6]
+            $checkSum = -join $checkSum
 
-            # Write-Output "checkSum: $($checkSum)"
+            # Write-Output "$($TargetFileName) checkSum: $($checkSum)"
             if ((Get-FileHash $DownloadFullPath -Algorithm SHA256).Hash.ToLower() -eq "$($checkSum)") {
                 Write-Output "ok"
                 Rename-Item $TargetDir $BackupDir `
@@ -80,15 +97,15 @@ function  Update-Python {
                     && Start-Process $DownloadFullPath -ArgumentList "/repair","/quiet","DefaultJustForMeTargetDir=$($TargetDir)","InstallAllUsers=0","CompileAll=1","Shortcuts=0","Include_doc=1","AssociateFiles=0","AppendPath=0","Include_launcher=0","InstallLauncherAllUsers=0" -NoNewWindow -Wait `
                     && Write-Output "cleanup" `
                     && Remove-Item -Path $DownloadFullPath -Force `
-                    && Remove-Item -Path "$($DownloadFullPath).asc" -Recurse -Force `
+                    && Remove-Item -Path "$($DownloadFullPath).sig" -Recurse -Force `
                     && Remove-Item -Path "$($env:TEMP)\Python $($RemoteLatestTag)*.log" -Force `
                     && Remove-Item -Path $BackupDir -Recurse -Force `
                     && Write-Output "updated to version: $($RemoteLatestTag)" `
                 || Rename-Item $BackupDir $TargetDir
             }
-        } catch {
-            Write-Output "Something goes wrong by download of file: $($TargetFileName)!"
-        }
+        # } catch {
+            # Write-Output "Something goes wrong by download of file: $($TargetFileName), Url: $($Url)/$($TargetFileName) !"
+        # }
     } else {
         Write-Output "Nothing to update."
     }

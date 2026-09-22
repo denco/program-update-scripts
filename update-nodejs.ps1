@@ -37,7 +37,6 @@ function  Update-NodeJs {
                             | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split 'v')[1] } `
                             | Select-Object -Last 1
                         )".Trim().Split("/")[2].Replace("v", "")
-
     try {
         $CurrentVersion = (& "$($TargetDir)\node.exe" --version).Trim().Replace("v", "")
     }
@@ -72,7 +71,7 @@ function  Update-NodeJs {
 
                 Write-Output "check signature" `
                 && & $gpg --verify "$($env:TEMP)\SHASUMS256.txt.asc"  >nul 2>&1 `
-                || exit 1
+                || Invoke-command -ScriptBlock {exit 1}
 
 
                 $ShaSum = (Select-String -Path "$($env:TEMP)\SHASUMS256.txt.asc" -Pattern "(.*)\s+$($TargetFileName)").Matches.Groups[1].Value.Trim()

@@ -48,7 +48,7 @@ if ( [System.Version]"$($RemoteLatestTag).0.0" -gt [System.Version]"$($CurrentVe
     $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
 
     $Url ="https://dlcdn.apache.org/netbeans/netbeans/$($RemoteLatestTag)/$($TargetFileName)"
-    # Write-Output "URL: $($Url)"
+    Write-Output "URL: $($Url)"
 
     $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
     $ShaSum = (Invoke-WebRequest -Uri "$($Url).sha512").Content.Split(" ")[0]

@@ -20,6 +20,13 @@ $RemoteLatestTag = [System.Version]"$(git ls-remote --tags "$($ToolRepoBaseUrl).
                         | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2] } `
                         | Select-Object -Last 1
                     )".Trim().Split('/')[2]
+$StablBuildVersion = [System.Version]"$((Invoke-WebRequest -Uri "https://code.visualstudio.com/sha?build=stable").Content.Split("},{").Split(",") `
+                                      | Select-String -Pattern "productVersion" -SimpleMatch
+                                    )".Split(":")[-1].Replace("`"","")
+if ( $RemoteLatestTag -ne $StablBuildVersion ) {
+    Write-Output "Remote tag: $($RemoteLatestTag) and stable build version: $($StablBuildVersion) are differ, use stable build version!"
+    $RemoteLatestTag = $StablBuildVersion
+}
 
 $CurrentVersion = "0.0.0.0"
 

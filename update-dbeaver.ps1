@@ -13,7 +13,7 @@ Write-Output "check updates for: dbeaver"
 
 $RemoteLatestTag = "$(git ls-remote --tags "https://github.com/dbeaver/dbeaver.git" `
                         | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2] } `
-                        | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2].replace('v','') }
+                        | Sort-Object -erroraction 'SilentlyContinue' { [System.version]($_ -split '/')[2].replace('v','') } `
                         | Select-Object -Last 1
                     )".Trim().Split('/')[2]
 
@@ -31,7 +31,7 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\.eclipseprodu
 if ( [System.Version]$RemoteLatestTag -gt [System.Version]$CurrentVersion ) {
     Write-Output "update needed to: $($RemoteLatestTag)"
 #
-    $TargetFileName = "dbeaver-ce-$($RemoteLatestTag)-win32.win32.x86_64.zip"
+    $TargetFileName = "dbeaver-ce-$($RemoteLatestTag)-windows-x86_64.zip"
     $DownloadFullPath = "$($env:TEMP)\$($TargetFileName)"
 
     $Url ="https://github.com/dbeaver/dbeaver/releases/download/$($RemoteLatestTag)/$($TargetFileName)"
