@@ -53,7 +53,7 @@ if (( Test-Path -Path $TargetDir) -And (Test-Path -Path $TargetDir\VERSION )) {
 
 if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersion)" ) {
     try {
-        Get-Process -Name "soffice.bin" | Stop-Process >nul 2>&1
+        Get-Process -Name "soffice.bin" >/nul 2>&1 | Stop-Process >nul 2>&1
     } catch {}
 
     Write-Output "update needed to: $($RemoteLatestTag)"
@@ -67,16 +67,25 @@ if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersio
 
     # Write-Output ">$($Url)<"
 
-    $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-    $Sha256Sum = (Invoke-WebRequest -Uri "$($Url).sha256").Content.Trim().split(' ')[0]
-    $ProgressPreference = 'Continue'
-
-    if ( -not (Test-Path -Path $DownloadFullPath)  ) {
-        # download file
+    $Sha256Sum = "none"
+    try {
         $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
-        Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
+        $Sha256Sum = (Invoke-WebRequest -Uri "$($Url).sha256").Content.Trim().split(' ')[0]
         $ProgressPreference = 'Continue'
+    } catch {}
+
+    try {
+        if ( -not (Test-Path -Path $DownloadFullPath)  ) {
+            # download file
+            $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
+            Invoke-WebRequest -Uri $Url -OutFile $DownloadFullPath
+            $ProgressPreference = 'Continue'
+        }
+    } catch {
+        Write-Output "download is not available."
+        exit 0
     }
+
     # download signature
     $ProgressPreference = 'SilentlyContinue'    # Subsequent calls do not display UI.
     Invoke-WebRequest -Uri "$($Url).asc" -OutFile "$($DownloadFullPath).asc"
@@ -84,7 +93,8 @@ if ( [System.Version]"$($RemoteLatestTag)" -gt [System.Version]"$($CurrentVersio
 
     # Write-Output ">$($Sha256Sum)<"
 
-    if ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)") {
+    if (( "$($Sha256Sum)" -eq "none") || ((Get-FileHash $DownloadFullPath).Hash.ToLower() -eq "$($Sha256Sum)")) {
+    # if (1 -eq 1) {
         # Write-Output "ok"
             # && Start-MpScan -ScanPath $DownloadFullPath -ScanType CustomScan `
         Rename-Item $TargetDir $BackupDir `

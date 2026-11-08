@@ -70,12 +70,12 @@ function  Update-Python {
             $ProgressPreference = 'Continue'
 
             if ([System.Version]$($RemoteLatestTag) -lt [System.Version]'3.14' ) {
-                Write-Output "check signature" `
+                Write-Output "check gpg signature" `
                 && & $gpg --verify "$($DownloadFullPath).$($SignatureFileExtension)"  >nul 2>&1 `
                 || Invoke-command -ScriptBlock {exit 1}
                 # || exit 1
             } else {
-                Write-Output "COSIGN"
+                Write-Output "check cosign signature"
                 cosign verify-blob "$($DownloadFullPath)" `
                     --bundle "$($DownloadFullPath).$($SignatureFileExtension)" `
                     --cert-identity hugo@python.org `
@@ -97,7 +97,7 @@ function  Update-Python {
                     && Start-Process $DownloadFullPath -ArgumentList "/repair","/quiet","DefaultJustForMeTargetDir=$($TargetDir)","InstallAllUsers=0","CompileAll=1","Shortcuts=0","Include_doc=1","AssociateFiles=0","AppendPath=0","Include_launcher=0","InstallLauncherAllUsers=0" -NoNewWindow -Wait `
                     && Write-Output "cleanup" `
                     && Remove-Item -Path $DownloadFullPath -Force `
-                    && Remove-Item -Path "$($DownloadFullPath).sig" -Recurse -Force `
+                    && Remove-Item -Path "$($DownloadFullPath).$($SignatureFileExtension)" -Recurse -Force `
                     && Remove-Item -Path "$($env:TEMP)\Python $($RemoteLatestTag)*.log" -Force `
                     && Remove-Item -Path $BackupDir -Recurse -Force `
                     && Write-Output "updated to version: $($RemoteLatestTag)" `
