@@ -1,0 +1,42 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "bruno",
+  "name": "Bruno",
+  "description": "Fast and git-friendly opensource API client",
+  "homepage": "https://github.com/usebruno/bruno",
+  "updateDelayDays": 3,
+  "target": {
+    "type": "directory",
+    "directoryName": "bruno"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/usebruno/bruno.git",
+      "excludePattern": "alpha|beta|\\{\\}",
+      "tagVersionExtractRegex": "v(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/usebruno/bruno/releases/download/v${version}/${fileName}",
+    "fileNameTemplate": "bruno_${version}_x64_win.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "html-scrape",
+      "urlTemplate": "https://github.com/usebruno/bruno/releases/expanded_assets/v${version}",
+      "encoding": "hex",
+      "extractRegex": "sha256:([a-fA-F0-9]{64})"
+    }
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "direct-7z"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "beekeeper-studio",
+  "name": "Beekeeper Studio",
+  "description": "Open source SQL editor and database manager",
+  "homepage": "https://github.com/beekeeper-studio/beekeeper-studio",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "beekeeper"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/beekeeper-studio/beekeeper-studio.git",
+      "excludePattern": "-|{}|latest|v7\\.[7|8]\\.[0|1]",
+      "tagVersionExtractRegex": "v(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/beekeeper-studio/beekeeper-studio/releases/download/v${version}/${fileName}",
+    "fileNameTemplate": "Beekeeper-Studio-Setup-${version}.exe"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha512",
+      "source": "manifest-yaml",
+      "urlTemplate": "https://github.com/beekeeper-studio/beekeeper-studio/releases/download/v${version}/latest.yml",
+      "encoding": "base64",
+      "linePattern": "sha512:\\s*(\\S+)"
+    }
+  },
+  "extraction": {
+    "format": "nsis-exe",
+    "method": "nested-7z",
+    "nestedArchivePath": "$PLUGINSDIR/app-64.7z"
+  }
+}

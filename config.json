@@ -1,0 +1,15 @@
+{
+  "$schema": "./schema/config.schema.json",
+  "version": "1.0.0",
+  "defaults": {
+    "baseInstallPath": "$env:LOCALAPPDATA\\Programs",
+    "binDirectory": "$env:LOCALAPPDATA\\Programs\\bin",
+    "sevenZipPath": "$env:LOCALAPPDATA\\Programs\\7-zip\\7z.exe",
+    "gpgPath": "$env:LOCALAPPDATA\\Programs\\git\\usr\\bin\\gpg.exe",
+    "virusScanner": {
+      "enabled": true,
+      "executable": "${env:ProgramFiles}\\Windows Defender\\MpCmdRun.exe",
+      "arguments": ["-Scan", "-ScanType", "3", "-File", "${filePath}"]
+    }
+  }
+}

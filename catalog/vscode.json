@@ -1,0 +1,47 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "vscode",
+  "name": "Visual Studio Code",
+  "description": "Code editing redefined",
+  "homepage": "https://code.visualstudio.com",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "vscode",
+    "cleanups": ["appx", "tools"]
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/microsoft/vscode.git",
+      "excludePattern": "alpha|beta|1\\.999\\.0|\\{\\}",
+      "tagVersionExtractRegex": "refs/tags/(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver",
+      "secondaryStableCheck": {
+        "url": "https://code.visualstudio.com/sha?build=stable",
+        "jsonPath": "productVersion"
+      }
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://update.code.visualstudio.com/${version}/win32-x64-archive/stable",
+    "fileNameTemplate": "VSCode-win32-x64-${version}.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "json-api",
+      "urlTemplate": "https://code.visualstudio.com/sha?build=stable",
+      "encoding": "hex",
+      "extractRegex": "\"sha\":\\s*\"([a-fA-F0-9]{64})\""
+    }
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "direct-7z"
+  }
+}

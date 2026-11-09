@@ -1,0 +1,43 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "git",
+  "name": "Git for Windows (Portable)",
+  "description": "Portable Git version control system",
+  "homepage": "https://github.com/git-for-windows/git",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "git"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/git-for-windows/git.git",
+      "matchPattern": "windows",
+      "excludePattern": "\\{\\}|-rc",
+      "tagVersionExtractRegex": "v(\\d+\\.\\d+\\.\\d+(?:\\.windows\\.\\d+)?)",
+      "sortStrategy": "split-version"
+    },
+    "local": {
+      "source": "executable-version",
+      "command": "git --version",
+      "extractRegex": "git version (\\d+\\.\\d+\\.\\d+)"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/git-for-windows/git/releases/download/v${remoteTag}/${fileName}",
+    "fileNameTemplate": "PortableGit-${version}-64-bit.7z.exe"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "html-scrape",
+      "urlTemplate": "https://github.com/git-for-windows/git/releases",
+      "encoding": "hex"
+    }
+  },
+  "extraction": {
+    "format": "7z",
+    "method": "direct-7z"
+  }
+}

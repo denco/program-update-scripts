@@ -1,0 +1,290 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "./tool.schema.json",
+  "title": "Single Tool Specification Schema",
+  "description": "Defines declarative specification for checking, downloading, verifying, and installing a developer tool.",
+  "type": "object",
+  "required": ["id", "name", "target", "version", "download", "extraction"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the tool in kebab-case",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the tool"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the tool"
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri"
+    },
+    "updateDelayDays": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Cooldown period in days before upgrading to a newly detected remote release"
+    },
+    "multiVersion": {
+      "type": "object",
+      "description": "Configuration for tools that support concurrent side-by-side versions",
+      "required": ["enabled", "parameterName"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "parameterName": {
+          "type": "string",
+          "enum": ["mainVersion"],
+          "default": "mainVersion"
+        },
+        "tagPatternTemplate": { "type": "string" },
+        "defaultVersions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "description": "Target paths and filesystem lifecycle settings",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["directory", "binary", "multiVersionDirectory"]
+        },
+        "directoryName": {
+          "type": "string",
+          "description": "Subdirectory name under baseInstallPath. Defaults to id"
+        },
+        "binaryName": {
+          "type": "string",
+          "description": "Binary name under binDirectory when type is binary"
+        },
+        "preUpdateKillProcess": {
+          "type": "string",
+          "description": "Process name to terminate prior to update (e.g. soffice.bin)"
+        },
+        "preserve": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files or folders preserved from .bak directory across updates"
+        },
+        "cleanups": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relative paths within target directory to remove after extraction"
+        },
+        "renames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "destination"],
+            "properties": {
+              "source": { "type": "string" },
+              "destination": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "description": "How to detect remote and local versions",
+      "required": ["remote", "local"],
+      "properties": {
+        "remote": {
+          "type": "object",
+          "required": ["source"],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": ["git-ls-remote", "http-scrape", "json-api"]
+            },
+            "repositoryUrl": {
+              "type": "string",
+              "description": "Git repository URL for git-ls-remote"
+            },
+            "url": {
+              "type": "string",
+              "description": "URL for http-scrape or json-api sources"
+            },
+            "matchPattern": {
+              "type": "string",
+              "description": "Regex or substring pattern to filter tags / lines"
+            },
+            "excludePattern": {
+              "type": "string",
+              "description": "Regex pattern to exclude unstable / unwanted tags"
+            },
+            "tagVersionExtractRegex": {
+              "type": "string",
+              "description": "Regex pattern with capturing group to extract the version string"
+            },
+            "sortStrategy": {
+              "type": "string",
+              "enum": ["semver", "numeric", "split-version", "lexical"],
+              "default": "semver"
+            },
+            "secondaryStableCheck": {
+              "type": "object",
+              "description": "Secondary check to confirm or override latest stable build (e.g. VS Code)",
+              "properties": {
+                "url": { "type": "string" },
+                "jsonPath": { "type": "string" },
+                "regex": { "type": "string" }
+              }
+            }
+          }
+        },
+        "local": {
+          "type": "object",
+          "required": ["source"],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": ["version-file", "executable-version", "metadata-file"]
+            },
+            "fileName": {
+              "type": "string",
+              "description": "Name of the version or metadata file (e.g. VERSION, .eclipseproduct, release)"
+            },
+            "command": {
+              "type": "string",
+              "description": "Command or relative executable path (e.g. {targetDir}\\node.exe --version)"
+            },
+            "propertyKey": {
+              "type": "string",
+              "description": "Property key within metadata file (e.g. version, SEMANTIC_VERSION)"
+            },
+            "extractRegex": {
+              "type": "string",
+              "description": "Regex to extract the clean version string from output or file content"
+            }
+          }
+        }
+      }
+    },
+    "download": {
+      "type": "object",
+      "description": "Download URL and filename templates with variable substitution",
+      "required": ["urlTemplate", "fileNameTemplate"],
+      "properties": {
+        "urlTemplate": {
+          "type": "string",
+          "description": "URL template supports variables like ${version}, ${mainVersion}, ${fileName}"
+        },
+        "fileNameTemplate": {
+          "type": "string",
+          "description": "Target filename template (e.g. Beekeeper-Studio-Setup-${version}.exe)"
+        },
+        "transformations": {
+          "type": "object",
+          "description": "Custom variable substitutions such as version without dots",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "description": "Integrity checksum, cryptographic signature, and malware scan rules",
+      "properties": {
+        "checksum": {
+          "type": "object",
+          "required": ["algorithm", "source"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["sha256", "sha512", "sha1", "none"]
+            },
+            "source": {
+              "type": "string",
+              "enum": [
+                "sidecar-file",
+                "digest-file",
+                "checksums-file",
+                "manifest-yaml",
+                "json-api",
+                "html-scrape",
+                "none"
+              ]
+            },
+            "urlTemplate": { "type": "string" },
+            "encoding": {
+              "type": "string",
+              "enum": ["hex", "base64"],
+              "default": "hex"
+            },
+            "extractRegex": { "type": "string" },
+            "linePattern": { "type": "string" }
+          }
+        },
+        "signatures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "urlTemplate"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["gpg", "cosign"]
+              },
+              "urlTemplate": { "type": "string" },
+              "versionCondition": {
+                "type": "string",
+                "description": "Version condition such as '< 3.14' or '>= 3.14'"
+              },
+              "publicKeyId": { "type": "string" },
+              "cosignCertIdentity": { "type": "string" },
+              "cosignOidcIssuer": { "type": "string" }
+            }
+          }
+        },
+        "malwareScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to perform malware scan on the downloaded artifact before extraction"
+        }
+      }
+    },
+    "extraction": {
+      "type": "object",
+      "description": "Extraction method, tools, subfolders, and flags",
+      "required": ["method", "format"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["zip", "7z", "msi", "nupkg", "nsis-exe", "inno-exe", "native-exe"]
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "direct-7z",
+            "subfolder-move",
+            "nested-7z",
+            "msi-admin",
+            "installer-silent",
+            "single-binary-7z"
+          ]
+        },
+        "sourceSubfolder": {
+          "type": "string",
+          "description": "Subdirectory to move from staging into final target directory"
+        },
+        "nestedArchivePath": {
+          "type": "string",
+          "description": "Path inside outer archive to inner archive (e.g. $PLUGINSDIR/app-64.7z)"
+        },
+        "installerArgs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Arguments when method is installer-silent"
+        }
+      }
+    }
+  }
+}

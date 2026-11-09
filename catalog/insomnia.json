@@ -1,0 +1,44 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "insomnia",
+  "name": "Insomnia",
+  "description": "The open-source, cross-platform API client for GraphQL, REST, WebSockets, and gRPC",
+  "homepage": "https://github.com/Kong/insomnia",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "insomnia"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/Kong/insomnia.git",
+      "matchPattern": "core@",
+      "excludePattern": "alpha|beta|\\{\\}|20\\d\\d",
+      "tagVersionExtractRegex": "core@(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/Kong/insomnia/releases/download/core%40${version}/${fileName}",
+    "fileNameTemplate": "insomnia-${version}-full.nupkg"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha1",
+      "source": "checksums-file",
+      "urlTemplate": "https://github.com/Kong/insomnia/releases/download/core%40${version}/RELEASES",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{40})"
+    }
+  },
+  "extraction": {
+    "format": "nupkg",
+    "method": "subfolder-move",
+    "sourceSubfolder": "lib/net*"
+  }
+}

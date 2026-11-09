@@ -1,0 +1,46 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "sumatrapdf",
+  "name": "SumatraPDF",
+  "description": "Slim, free, open-source PDF, eBook (ePub, Mobi), XPS, DjVu, CHM reader",
+  "homepage": "https://www.sumatrapdfreader.org",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "sumatrapdf",
+    "preserve": ["SumatraPDF-settings.txt"],
+    "renames": [
+      {
+        "source": "SumatraPDF*.exe",
+        "destination": "SumatraPDF.exe"
+      }
+    ]
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/sumatrapdfreader/sumatrapdf.git",
+      "matchPattern": "rel",
+      "tagVersionExtractRegex": "rel(?:-)?(\\d+(?:\\.\\d+)*)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://www.sumatrapdfreader.org/dl/rel/${version}/${fileName}",
+    "fileNameTemplate": "SumatraPDF-${version}-64.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "none",
+      "source": "none"
+    }
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "direct-7z"
+  }
+}

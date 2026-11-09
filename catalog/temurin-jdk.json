@@ -1,0 +1,57 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "temurin-jdk",
+  "name": "Eclipse Temurin JDK",
+  "description": "Adoptium OpenJDK binaries with HotSpot",
+  "homepage": "https://adoptium.net",
+  "updateDelayDays": 0,
+  "multiVersion": {
+    "enabled": true,
+    "parameterName": "mainVersion",
+    "tagPatternTemplate": "${mainVersion}",
+    "defaultVersions": ["21"]
+  },
+  "target": {
+    "type": "multiVersionDirectory",
+    "directoryName": "jdk/${mainVersion}"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/adoptium/temurin${mainVersion}-binaries.git",
+      "excludePattern": "jdk8u|-beta|-ga",
+      "tagVersionExtractRegex": "jdk-(\\d+(?:\\.\\d+)*\\+\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "metadata-file",
+      "fileName": "release",
+      "propertyKey": "SEMANTIC_VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/adoptium/temurin${mainVersion}-binaries/releases/download/jdk-${version}/${fileName}",
+    "fileNameTemplate": "OpenJDK${mainVersion}U-jdk_x64_windows_hotspot_${versionUnderscore}.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "sidecar-file",
+      "urlTemplate": "https://github.com/adoptium/temurin${mainVersion}-binaries/releases/download/jdk-${version}/${fileName}.sha256.txt",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{64})"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://github.com/adoptium/temurin${mainVersion}-binaries/releases/download/jdk-${version}/${fileName}.sig",
+        "publicKeyId": "3B04D753C9050D9A5D343F39843C48A565F8F04B"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "subfolder-move",
+    "sourceSubfolder": "jdk-*"
+  }
+}

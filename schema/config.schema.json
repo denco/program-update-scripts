@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "./config.schema.json",
+  "title": "Tool Download Specification Schema",
+  "description": "Defines declarative specifications for checking, downloading, verifying, and installing developer tools and applications.",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string", "description": "Schema/spec file version" },
+    "defaults": {
+      "type": "object",
+      "description": "Global default options applied to all tools unless overridden",
+      "properties": {
+        "baseInstallPath": {
+          "type": "string",
+          "default": "$env:LOCALAPPDATA\\Programs",
+          "description": "Base directory for installed programs"
+        },
+        "binDirectory": {
+          "type": "string",
+          "default": "$env:LOCALAPPDATA\\Programs\\bin",
+          "description": "Directory for standalone executables"
+        },
+        "sevenZipPath": {
+          "type": "string",
+          "default": "$env:LOCALAPPDATA\\Programs\\7-Zip\\7z.exe"
+        },
+        "gpgPath": {
+          "type": "string",
+          "default": "$env:LOCALAPPDATA\\Programs\\git\\usr\\bin\\gpg.exe"
+        },
+        "virusScanner": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "executable": {
+              "type": "string",
+              "default": "${env:ProgramFiles}\\Windows Defender\\MpCmdRun.exe"
+            },
+            "arguments": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["-Scan", "-ScanType", "3", "-File", "${filePath}"]
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "List of tool download and installation specifications",
+      "items": { "$ref": "./tool.schema.json" }
+    }
+  }
+}

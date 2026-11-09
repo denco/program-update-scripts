@@ -1,0 +1,57 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "nodejs",
+  "name": "Node.js",
+  "description": "JavaScript runtime built on Chrome's V8 JavaScript engine",
+  "homepage": "https://nodejs.org",
+  "updateDelayDays": 0,
+  "multiVersion": {
+    "enabled": true,
+    "parameterName": "mainVersion",
+    "tagPatternTemplate": "v${mainVersion}",
+    "defaultVersions": ["26"]
+  },
+  "target": {
+    "type": "multiVersionDirectory",
+    "directoryName": "node/${mainVersion}"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/nodejs/node.git",
+      "matchPattern": "v${mainVersion}",
+      "excludePattern": "\\{\\}",
+      "tagVersionExtractRegex": "v(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "executable-version",
+      "command": "${targetDir}/node.exe --version",
+      "extractRegex": "v?(\\d+\\.\\d+\\.\\d+)"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://nodejs.org/dist/v${version}/${fileName}",
+    "fileNameTemplate": "node-v${version}-win-x64.7z"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "checksums-file",
+      "urlTemplate": "https://nodejs.org/dist/v${version}/SHASUMS256.txt.asc",
+      "encoding": "hex",
+      "extractRegex": "([a-fA-F0-9]{64})\\s+${fileName}"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://nodejs.org/dist/v${version}/SHASUMS256.txt.asc"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "7z",
+    "method": "subfolder-move",
+    "sourceSubfolder": "*"
+  }
+}

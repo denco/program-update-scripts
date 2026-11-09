@@ -1,0 +1,38 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "restfox",
+  "name": "Restfox",
+  "description": "Offline-first minimalistic REST client",
+  "homepage": "https://github.com/flawiddsouza/Restfox",
+  "updateDelayDays": 3,
+  "target": {
+    "type": "directory",
+    "directoryName": "restfox"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/flawiddsouza/Restfox.git",
+      "tagVersionExtractRegex": "refs/tags/v?(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/flawiddsouza/Restfox/releases/download/v${version}/${fileName}",
+    "fileNameTemplate": "Restfox-win32-x64-${version}.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "none",
+      "source": "none"
+    }
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "direct-7z"
+  }
+}

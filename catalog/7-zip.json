@@ -1,0 +1,42 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "7-zip",
+  "name": "7-Zip",
+  "description": "File archiver with a high compression ratio",
+  "homepage": "https://www.7-zip.org",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "7-zip"
+  },
+  "version": {
+    "remote": {
+      "source": "http-scrape",
+      "url": "https://sourceforge.net/projects/sevenzip/files/7-Zip/",
+      "matchPattern": "class=\"folder\"",
+      "tagVersionExtractRegex": "7-zip/(\\d+\\.\\d+)/",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://www.7-zip.org/a/${fileName}",
+    "fileNameTemplate": "7z${versionWithoutDots}-x64.msi"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha1",
+      "source": "json-api",
+      "urlTemplate": "https://sourceforge.net/projects/sevenzip/files/7-Zip/${version}/",
+      "encoding": "hex"
+    }
+  },
+  "extraction": {
+    "format": "msi",
+    "method": "msi-admin",
+    "sourceSubfolder": "Files/7*"
+  }
+}

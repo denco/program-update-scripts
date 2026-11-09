@@ -1,0 +1,39 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "hoppscotch",
+  "name": "Hoppscotch",
+  "description": "Open source API development ecosystem desktop app",
+  "homepage": "https://github.com/hoppscotch/hoppscotch",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "hoppscotch"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/hoppscotch/releases.git",
+      "tagVersionExtractRegex": "refs/tags/(?:v)?(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/hoppscotch/releases/releases/latest/download/${fileName}",
+    "fileNameTemplate": "Hoppscotch_win_x64.msi"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "none",
+      "source": "none"
+    }
+  },
+  "extraction": {
+    "format": "msi",
+    "method": "msi-admin",
+    "sourceSubfolder": "PFiles/Hoppscotch"
+  }
+}

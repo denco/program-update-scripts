@@ -1,0 +1,49 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "maven",
+  "name": "Apache Maven",
+  "description": "Software project management and comprehension tool",
+  "homepage": "https://github.com/apache/maven",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "maven"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/apache/maven.git",
+      "matchPattern": "maven-",
+      "excludePattern": "alpha|beta|\\{\\}",
+      "tagVersionExtractRegex": "maven-(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://dlcdn.apache.org/maven/maven-${mainVersion}/${version}/binaries/${fileName}",
+    "fileNameTemplate": "apache-maven-${version}-bin.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha512",
+      "source": "sidecar-file",
+      "urlTemplate": "https://dlcdn.apache.org/maven/maven-${mainVersion}/${version}/binaries/${fileName}.sha512",
+      "encoding": "hex"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://dlcdn.apache.org/maven/maven-${mainVersion}/${version}/binaries/${fileName}.asc"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "subfolder-move",
+    "sourceSubfolder": "apache-maven*"
+  }
+}

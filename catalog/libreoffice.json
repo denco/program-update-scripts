@@ -1,0 +1,50 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "libreoffice",
+  "name": "LibreOffice",
+  "description": "Free and open source office suite",
+  "homepage": "https://www.libreoffice.org",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "libreoffice",
+    "preUpdateKillProcess": "soffice.bin"
+  },
+  "version": {
+    "remote": {
+      "source": "http-scrape",
+      "url": "https://download.documentfoundation.org/libreoffice/stable/?C=M;O=A",
+      "matchPattern": "\\d+\\.\\d+\\.\\d+",
+      "tagVersionExtractRegex": "href=[\"']?(\\d+\\.\\d+\\.\\d+)/?[\"']?",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://download.documentfoundation.org/libreoffice/stable/${version}/win/x86_64/${fileName}",
+    "fileNameTemplate": "LibreOffice_${version}_Win_x86-64.msi"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "sidecar-file",
+      "urlTemplate": "https://download.documentfoundation.org/libreoffice/stable/${version}/win/x86_64/${fileName}.sha256",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{64})"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://download.documentfoundation.org/libreoffice/stable/${version}/win/x86_64/${fileName}.asc",
+        "publicKeyId": "C2839ECAD9408FBE9531C3E9F434A1EFAFEEAEA3"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "msi",
+    "method": "msi-admin"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "theia",
+  "name": "Eclipse Theia IDE",
+  "description": "Cloud & desktop IDE platform",
+  "homepage": "https://github.com/eclipse-theia/theia-ide",
+  "updateDelayDays": 3,
+  "target": {
+    "type": "directory",
+    "directoryName": "theia"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/eclipse-theia/theia-ide.git",
+      "excludePattern": "alpha|beta|\\{\\}",
+      "tagVersionExtractRegex": "refs/tags/v?(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://download.eclipse.org/theia/ide/${version}/windows/${fileName}",
+    "fileNameTemplate": "TheiaIDESetup-${version}.exe"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha512",
+      "source": "manifest-yaml",
+      "urlTemplate": "https://download.eclipse.org/theia/ide/${version}/windows/latest.yml",
+      "encoding": "base64",
+      "linePattern": "sha512:\\s*(\\S+)"
+    }
+  },
+  "extraction": {
+    "format": "nsis-exe",
+    "method": "nested-7z",
+    "nestedArchivePath": "$PLUGINSDIR/app-64.7z"
+  }
+}

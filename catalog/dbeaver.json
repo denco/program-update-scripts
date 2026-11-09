@@ -1,0 +1,43 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "dbeaver",
+  "name": "DBeaver Community Edition",
+  "description": "Universal database tool and SQL client",
+  "homepage": "https://github.com/dbeaver/dbeaver",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "dbeaver"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/dbeaver/dbeaver.git",
+      "excludePattern": "\\{\\}",
+      "tagVersionExtractRegex": "refs/tags/(?:v)?(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "metadata-file",
+      "fileName": ".eclipseproduct",
+      "propertyKey": "version"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/dbeaver/dbeaver/releases/download/${version}/${fileName}",
+    "fileNameTemplate": "dbeaver-ce-${version}-windows-x86_64.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "sidecar-file",
+      "urlTemplate": "https://dbeaver.io/files/${version}/checksum/${fileName}.sha256",
+      "encoding": "hex"
+    }
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "subfolder-move",
+    "sourceSubfolder": "dbeaver"
+  }
+}

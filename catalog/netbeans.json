@@ -1,0 +1,51 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "netbeans",
+  "name": "Apache NetBeans",
+  "description": "Integrated development environment for Java, PHP, HTML5 and more",
+  "homepage": "https://github.com/apache/netbeans",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "netbeans"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/apache/netbeans.git",
+      "excludePattern": "-|{}|\\.",
+      "tagVersionExtractRegex": "refs/tags/(\\d+)",
+      "sortStrategy": "numeric"
+    },
+    "local": {
+      "source": "metadata-file",
+      "fileName": "etc/netbeans.conf",
+      "propertyKey": "netbeans_default_userdir",
+      "extractRegex": "/(\\d+)"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://dlcdn.apache.org/netbeans/netbeans/${version}/${fileName}",
+    "fileNameTemplate": "netbeans-${version}-bin.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha512",
+      "source": "sidecar-file",
+      "urlTemplate": "https://dlcdn.apache.org/netbeans/netbeans/${version}/${fileName}.sha512",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{128})"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://dlcdn.apache.org/netbeans/netbeans/${version}/${fileName}.asc"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "subfolder-move",
+    "sourceSubfolder": "netbeans"
+  }
+}

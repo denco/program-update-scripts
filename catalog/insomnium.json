@@ -1,0 +1,44 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "insomnium",
+  "name": "Insomnium",
+  "description": "100% offline, privacy-focused open source API client fork of Insomnia",
+  "homepage": "https://github.com/ArchGPT/insomnium",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "insomnium"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/ArchGPT/insomnium.git",
+      "matchPattern": "core@",
+      "excludePattern": "alpha|beta|\\{\\}",
+      "tagVersionExtractRegex": "core@(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/ArchGPT/insomnium/releases/download/core%40${version}/${fileName}",
+    "fileNameTemplate": "insomnium-${version}-full.nupkg"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha1",
+      "source": "checksums-file",
+      "urlTemplate": "https://github.com/ArchGPT/insomnium/releases/download/core%40${version}/RELEASES",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{40})"
+    }
+  },
+  "extraction": {
+    "format": "nupkg",
+    "method": "subfolder-move",
+    "sourceSubfolder": "lib/net*"
+  }
+}

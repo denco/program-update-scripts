@@ -1,0 +1,43 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "github-desktop",
+  "name": "GitHub Desktop",
+  "description": "Simple collaboration from your desktop",
+  "homepage": "https://github.com/desktop/desktop",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "github-desktop"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/desktop/desktop.git",
+      "matchPattern": "release-\\d+\\.\\d+\\.\\d+$",
+      "tagVersionExtractRegex": "release-(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/desktop/desktop/releases/download/release-${version}/${fileName}",
+    "fileNameTemplate": "GitHubDesktop-${version}-x64-full.nupkg"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "checksums-file",
+      "urlTemplate": "https://github.com/desktop/desktop/releases/download/release-${version}/GitHub.Desktop-${version}-checksums.txt",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{64})\\s+.*${fileName}"
+    }
+  },
+  "extraction": {
+    "format": "nupkg",
+    "method": "subfolder-move",
+    "sourceSubfolder": "lib/net45"
+  }
+}

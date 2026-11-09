@@ -1,0 +1,51 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "terraform",
+  "name": "Terraform",
+  "description": "Infrastructure as Code tool by HashiCorp",
+  "homepage": "https://github.com/hashicorp/terraform",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "binary",
+    "binaryName": "terraform.exe"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/hashicorp/terraform.git",
+      "excludePattern": "-|{}",
+      "tagVersionExtractRegex": "refs/tags/v?(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "executable-version",
+      "command": "${binDirectory}/terraform.exe --version",
+      "extractRegex": "Terraform v?(\\d+\\.\\d+\\.\\d+)"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://releases.hashicorp.com/terraform/${version}/${fileName}",
+    "fileNameTemplate": "terraform_${version}_windows_amd64.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "checksums-file",
+      "urlTemplate": "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_SHA256SUMS",
+      "encoding": "hex",
+      "extractRegex": "([a-fA-F0-9]{64})\\s+${fileName}"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_SHA256SUMS.sig",
+        "publicKeyId": "C874011F0AB405110D02105534365D9472D7468F"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "single-binary-7z",
+    "sourceSubfolder": "terraform.exe"
+  }
+}

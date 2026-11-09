@@ -1,0 +1,41 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "yed",
+  "name": "yEd Graph Editor",
+  "description": "Powerful desktop application to quickly and effectively generate high-quality drawings of diagrams",
+  "homepage": "https://www.yworks.com/products/yed",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "yed",
+    "preserve": ["yed.bat", "yed.lnk"]
+  },
+  "version": {
+    "remote": {
+      "source": "http-scrape",
+      "url": "https://www.yworks.com/products/yed/download#download",
+      "matchPattern": "Download yEd ",
+      "tagVersionExtractRegex": "Download yEd (\\d+\\.\\d+(?:\\.\\d+)?)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://www.yworks.com/resources/yed/demo/${fileName}",
+    "fileNameTemplate": "yEd-${version}.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "none",
+      "source": "none"
+    }
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "subfolder-move",
+    "sourceSubfolder": "*"
+  }
+}

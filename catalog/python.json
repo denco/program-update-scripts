@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "python",
+  "name": "Python",
+  "description": "Python programming language runtime",
+  "homepage": "https://www.python.org",
+  "updateDelayDays": 0,
+  "multiVersion": {
+    "enabled": true,
+    "parameterName": "mainVersion",
+    "tagPatternTemplate": "v${mainVersion}",
+    "defaultVersions": ["3.14"]
+  },
+  "target": {
+    "type": "multiVersionDirectory",
+    "directoryName": "python/${mainVersion}"
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/python/cpython.git",
+      "matchPattern": "v${mainVersion}",
+      "excludePattern": "\\{\\}",
+      "tagVersionExtractRegex": "v(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "executable-version",
+      "command": "${targetDir}/python.exe --version",
+      "extractRegex": "Python (\\d+\\.\\d+\\.\\d+)"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://www.python.org/ftp/python/${version}/${fileName}",
+    "fileNameTemplate": "python-${version}-amd64.exe"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "html-scrape",
+      "urlTemplate": "https://www.python.org/downloads/release/python-${versionWithoutDots}/",
+      "encoding": "hex"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://www.python.org/ftp/python/${version}/${fileName}.asc",
+        "versionCondition": "< 3.14"
+      },
+      {
+        "type": "cosign",
+        "urlTemplate": "https://www.python.org/ftp/python/${version}/${fileName}.sigstore",
+        "versionCondition": ">= 3.14",
+        "cosignCertIdentity": "hugo@python.org",
+        "cosignOidcIssuer": "https://github.com/login/oauth"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "native-exe",
+    "method": "installer-silent",
+    "installerArgs": [
+      "/repair",
+      "/quiet",
+      "DefaultJustForMeTargetDir=${targetDir}",
+      "InstallAllUsers=0",
+      "CompileAll=1",
+      "Shortcuts=0",
+      "Include_doc=1",
+      "AssociateFiles=0",
+      "AppendPath=0",
+      "Include_launcher=0",
+      "InstallLauncherAllUsers=0"
+    ]
+  }
+}

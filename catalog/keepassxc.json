@@ -1,0 +1,51 @@
+{
+  "$schema": "../schema/tool.schema.json",
+  "id": "keepassxc",
+  "name": "KeePassXC",
+  "description": "Cross-platform community-driven port of KeePass",
+  "homepage": "https://github.com/keepassxreboot/keepassxc",
+  "updateDelayDays": 0,
+  "target": {
+    "type": "directory",
+    "directoryName": "keepassxc",
+    "preserve": ["config"]
+  },
+  "version": {
+    "remote": {
+      "source": "git-ls-remote",
+      "repositoryUrl": "https://github.com/keepassxreboot/keepassxc.git",
+      "excludePattern": "-|{}|latest",
+      "tagVersionExtractRegex": "refs/tags/(\\d+\\.\\d+\\.\\d+)",
+      "sortStrategy": "semver"
+    },
+    "local": {
+      "source": "version-file",
+      "fileName": "VERSION"
+    }
+  },
+  "download": {
+    "urlTemplate": "https://github.com/keepassxreboot/keepassxc/releases/download/${version}/${fileName}",
+    "fileNameTemplate": "KeePassXC-${version}-Win64.zip"
+  },
+  "verification": {
+    "checksum": {
+      "algorithm": "sha256",
+      "source": "digest-file",
+      "urlTemplate": "https://github.com/keepassxreboot/keepassxc/releases/download/${version}/${fileName}.DIGEST",
+      "encoding": "hex",
+      "extractRegex": "^([a-fA-F0-9]{64})"
+    },
+    "signatures": [
+      {
+        "type": "gpg",
+        "urlTemplate": "https://github.com/keepassxreboot/keepassxc/releases/download/${version}/${fileName}.sig",
+        "publicKeyId": "C1E4CBA3AD78D3AFD894F9E0B7A66F03B59076A8"
+      }
+    ]
+  },
+  "extraction": {
+    "format": "zip",
+    "method": "subfolder-move",
+    "sourceSubfolder": "*"
+  }
+}
